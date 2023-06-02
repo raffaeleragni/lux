@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - "README.md"
 jobs:
-  build:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
@@ -28,3 +28,34 @@ jobs:
       - name: "Build"
         run: |
           cargo build --release
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: disable git eol translation
+        run: git config --global core.autocrlf false
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+      - name: Install Rustup using win.rustup.rs
+        shell: powershell
+        run: |
+          # Disable the download progress bar which can cause perf issues
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --default-toolchain=none
+          del rustup-init.exe
+          rustup target add x86_64-pc-windows-msvc
+      - name: "Checks"
+        shell: cmd
+        run: |
+          cargo fmt --check || exit /b 1
+          cargo clippy --no-deps --tests -- -D warnings || exit /b 1
+      - name: "Test"
+        shell: cmd
+        run: |
+          cargo test || exit /b 1
+      - name: "Build"
+        shell: cmd
+        run: |
+          cargo build --release || exit /b 1
