@@ -1018,7 +1018,8 @@ dependencies = [
 [[package]]
 name = "bevy_sync"
 version = "0.1.0"
-source = "git+https://github.com/raffaeleragni/bevy_sync.git#d92e0654edd8231627c89191cef7ff3174839d6e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f112dc33cd52c93eed32b4cc48ef9fe90ff287919313cbbd351a718f7c5bc90f"
 dependencies = [
  "bevy",
  "bevy_renet",

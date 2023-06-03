@@ -63,3 +63,23 @@ jobs:
         shell: cmd
         run: |
           cargo build --release || exit /b 1
+  mac:
+    runs-on: macos-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: "max-"
+      - name: "Checks"
+        run: |
+          cargo fmt --check
+          cargo clippy --no-deps --tests -- -D warnings
+      - name: "Test"
+        run: |
+          cargo test
+      - name: "Build"
+        run: |
+          cargo build --release
+
