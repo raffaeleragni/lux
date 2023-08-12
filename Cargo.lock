@@ -995,7 +995,17 @@ version = "0.0.8"
 source = "git+https://github.com/lucaspoffo/renet?rev=c17994c2f2412ed52b86629bf89c62866293bd19#c17994c2f2412ed52b86629bf89c62866293bd19"
 dependencies = [
  "bevy",
- "renet",
+ "renet 0.0.12",
+]
+
+[[package]]
+name = "bevy_renet"
+version = "0.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "384b2082138eac1ff62f90bf31774c439bdeace11e64b70c3454ebd83b38b1eb"
+dependencies = [
+ "bevy",
+ "renet 0.0.13",
 ]
 
 [[package]]
@@ -1051,7 +1061,19 @@ version = "0.1.2"
 source = "git+https://github.com/raffaeleragni/bevy_sync?rev=493a838cd6f8b9d812cfb1414493b82616c703a2#493a838cd6f8b9d812cfb1414493b82616c703a2"
 dependencies = [
  "bevy",
- "bevy_renet",
+ "bevy_renet 0.0.8",
+ "bincode",
+ "serde",
+]
+
+[[package]]
+name = "bevy_sync"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "798e92cc8eb6c1ab34c783cf93ddd8db9be06b7561542d2ac2f48c52b661081e"
+dependencies = [
+ "bevy",
+ "bevy_renet 0.0.9",
  "bincode",
  "serde",
 ]
@@ -1527,7 +1549,7 @@ name = "components"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_sync",
+ "bevy_sync 0.1.2",
 ]
 
 [[package]]
@@ -2648,7 +2670,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_editor_pls",
- "bevy_sync",
+ "bevy_sync 0.1.4",
  "clap",
  "components",
  "serde",
@@ -3384,13 +3406,36 @@ dependencies = [
  "bytes",
  "log",
  "octets",
- "renetcode",
+ "renetcode 0.0.8",
+]
+
+[[package]]
+name = "renet"
+version = "0.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "751424a2b0a8640bc41ca8b969250491b1a29e9b872dee4c7c56bcc56575b76e"
+dependencies = [
+ "bevy_ecs",
+ "bytes",
+ "log",
+ "octets",
+ "renetcode 0.0.9",
 ]
 
 [[package]]
 name = "renetcode"
 version = "0.0.8"
 source = "git+https://github.com/lucaspoffo/renet?rev=c17994c2f2412ed52b86629bf89c62866293bd19#c17994c2f2412ed52b86629bf89c62866293bd19"
+dependencies = [
+ "chacha20poly1305",
+ "log",
+]
+
+[[package]]
+name = "renetcode"
+version = "0.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed06c64c06cd7d80c61d6049c7dea9cc39bbf685b73ef9a6c5d01fada276094f"
 dependencies = [
  "chacha20poly1305",
  "log",

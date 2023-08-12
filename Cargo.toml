@@ -8,8 +8,7 @@ bevy = { version ="0.11.0" }
 bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls", rev = "f72483a5d48ae61f01e05fbd3cfd6fc64ce54e34" }
 clap = {version = "4.3.0", features = ["derive"] }
 serde = { version = "1.0.160", features = ["derive"] }
-#bevy_sync = "0.1.0"
-bevy_sync = { git = "https://github.com/raffaeleragni/bevy_sync", rev = "493a838cd6f8b9d812cfb1414493b82616c703a2" }
+bevy_sync = "0.1.4"
 components = { path = "components" }
 
 # Enable a small amount of optimization in debug mode
