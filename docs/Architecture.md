@@ -58,5 +58,9 @@ System_Boundary(Backend, "Backend") {
 
 Backends are not needed for hosting nor for local use. If not logged in the user will remain anonymous and only have access to local disk for storage.
 
+#### Federated login option
+
+Maybe using https://github.com/NexusSocial/NexusProtocol/
+
 ### ...
 
