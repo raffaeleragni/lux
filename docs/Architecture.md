@@ -47,7 +47,16 @@ System_Boundary(Backend, "Backend") {
 
 ### Booststrap
 
-### Login
+- Main screen -> world selection
+- How differnt is interacton in VR?
+
+### Hosting
+
+### Connecting to a host
+
+### Backend (optional)
+
+Backends are not needed for hosting nor for local use. If not logged in the user will remain anonymous and only have access to local disk for storage.
 
 ### ...
 
