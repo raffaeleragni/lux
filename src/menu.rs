@@ -12,13 +12,27 @@ enum MenuState {
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<MenuState>();
-        app.add_systems(PreUpdate, enter_menu);
+        app.add_systems(
+            PreUpdate,
+            (
+                exc_to_enter_menu.run_if(in_state(MenuState::Off)),
+                esc_to_exit_menu.run_if(not(in_state(MenuState::Off))),
+            ),
+        );
     }
 }
 
-fn enter_menu(input: Res<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
+fn exc_to_enter_menu(mut input: ResMut<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
     if input.just_pressed(KeyCode::Escape) {
         state.set(MenuState::Main);
+        input.reset(KeyCode::Escape);
+    }
+}
+
+fn esc_to_exit_menu(mut input: ResMut<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
+    if input.just_pressed(KeyCode::Escape) {
+        state.set(MenuState::Off);
+        input.reset(KeyCode::Escape);
     }
 }
 
@@ -39,6 +53,14 @@ mod test {
         let mut app = setup();
         press_esc(&mut app);
         state_is(&app, MenuState::Main);
+    }
+
+    #[test]
+    fn test_transition_back_from_menu() {
+        let mut app = setup();
+        press_esc(&mut app);
+        press_esc(&mut app);
+        state_is(&app, MenuState::Off);
     }
 
     fn setup() -> App {
