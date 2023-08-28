@@ -22,17 +22,15 @@ impl Plugin for MenuPlugin {
     }
 }
 
-fn exc_to_enter_menu(mut input: ResMut<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
+fn exc_to_enter_menu(input: Res<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
     if input.just_pressed(KeyCode::Escape) {
         state.set(MenuState::Main);
-        input.reset(KeyCode::Escape);
     }
 }
 
-fn esc_to_exit_menu(mut input: ResMut<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
+fn esc_to_exit_menu(input: Res<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
     if input.just_pressed(KeyCode::Escape) {
         state.set(MenuState::Off);
-        input.reset(KeyCode::Escape);
     }
 }
 
@@ -79,6 +77,7 @@ mod test {
     fn press_esc(app: &mut App) {
         let input = &mut app.world.resource_mut::<Input<KeyCode>>();
         input.press(KeyCode::Escape);
+        input.release(KeyCode::Escape);
         app.update();
     }
 }
