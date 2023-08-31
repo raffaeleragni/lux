@@ -1,4 +1,5 @@
 mod cli;
+mod layouts;
 mod menu;
 
 use bevy::prelude::*;
@@ -13,6 +14,7 @@ fn main() {
     app.insert_resource(Args::parse());
     app.add_plugins(menu::MenuPlugin);
     app.add_systems(Startup, load_world.run_if(resource_exists::<Args>()));
+    layouts::setup(&mut app);
     app.run();
 }
 

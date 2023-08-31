@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 
-mod layout;
-
 pub struct MenuPlugin;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default, Hash, States)]
-enum MenuState {
+pub enum MenuState {
     #[default]
     Off,
     Main,
@@ -21,7 +19,6 @@ impl Plugin for MenuPlugin {
                 esc_to_exit_menu.run_if(not(in_state(MenuState::Off))),
             ),
         );
-        layout::setup(app);
     }
 }
 
