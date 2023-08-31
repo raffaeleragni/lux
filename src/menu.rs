@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+mod layout;
+
 pub struct MenuPlugin;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default, Hash, States)]
@@ -19,6 +21,7 @@ impl Plugin for MenuPlugin {
                 esc_to_exit_menu.run_if(not(in_state(MenuState::Off))),
             ),
         );
+        layout::setup(app);
     }
 }
 
