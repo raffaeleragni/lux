@@ -13,7 +13,11 @@ pub struct Args {
 #[derive(Subcommand, Clone, Debug)]
 pub enum Command {
     #[clap(name = "host")]
-    Host { world_file: String },
+    Host {
+        world_file: String,
+        #[clap(long, short, action, default_value_t = false)]
+        headless: bool,
+    },
     #[clap(name = "join")]
     Join { ip: Ipv4Addr },
 }
