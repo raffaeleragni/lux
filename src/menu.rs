@@ -15,14 +15,14 @@ impl Plugin for MenuPlugin {
         app.add_systems(
             PreUpdate,
             (
-                exc_to_enter_menu.run_if(in_state(MenuState::Off)),
+                esc_to_enter_menu.run_if(in_state(MenuState::Off)),
                 esc_to_exit_menu.run_if(not(in_state(MenuState::Off))),
             ),
         );
     }
 }
 
-fn exc_to_enter_menu(input: Res<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
+fn esc_to_enter_menu(input: Res<Input<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
     if input.just_pressed(KeyCode::Escape) {
         state.set(MenuState::Main);
     }

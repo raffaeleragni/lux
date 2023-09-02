@@ -10,7 +10,6 @@ use cli::{Args, Command};
 
 fn main() {
     let mut app = App::new();
-    components::register(&mut app);
     let args = Args::parse();
     let headless = match args.command {
         Command::Host {
@@ -19,8 +18,8 @@ fn main() {
         } => headless,
         _ => false,
     };
-
     app.insert_resource(args);
+
     if headless {
         app.add_plugins(AssetPlugin::default());
         app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
@@ -33,11 +32,15 @@ fn main() {
         layouts::setup(&mut app);
     }
 
-    app.add_systems(Startup, load_world.run_if(resource_exists::<Args>()));
+    components::register(&mut app);
+    app.add_systems(
+        Startup,
+        load_world_from_args.run_if(resource_exists::<Args>()),
+    );
     app.run();
 }
 
-fn load_world(args: Res<Args>, ass: Res<AssetServer>, mut commands: Commands) {
+fn load_world_from_args(args: Res<Args>, ass: Res<AssetServer>, mut commands: Commands) {
     match &args.command {
         Command::Join { ip: _ } => todo!(),
         Command::Host {
