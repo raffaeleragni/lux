@@ -2,9 +2,15 @@ mod cli;
 mod layouts;
 mod menu;
 
-use std::time::Duration;
+use std::{
+    net::{IpAddr, Ipv4Addr},
+    time::Duration,
+};
 
-use bevy::{app::ScheduleRunnerPlugin, prelude::*};
+use bevy::{
+    app::ScheduleRunnerPlugin, pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb,
+};
+use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncDown, SyncMark, SyncPlugin};
 use clap::Parser;
 use cli::{Args, Command};
 
@@ -18,7 +24,7 @@ fn main() {
         } => headless,
         _ => false,
     };
-    app.insert_resource(args);
+    app.insert_resource(args.clone());
 
     if headless {
         app.add_plugins(AssetPlugin::default());
@@ -32,26 +38,96 @@ fn main() {
         layouts::setup(&mut app);
     }
 
+    setup_sync(args.clone(), &mut app);
+
     components::register(&mut app);
     app.add_systems(
         Startup,
         load_world_from_args.run_if(resource_exists::<Args>()),
     );
+
+    app.add_systems(
+        Update,
+        (loaded_scene_item_propagate, loaded_scene_item_cleanup),
+    );
     app.run();
 }
 
-fn load_world_from_args(args: Res<Args>, ass: Res<AssetServer>, mut commands: Commands) {
+fn setup_sync(args: Args, app: &mut App) {
+    app.add_plugins(SyncPlugin);
+    app.sync_component::<Name>();
+    app.sync_component::<Aabb>();
+    app.sync_component::<Visibility>();
+    app.sync_component::<Transform>();
+    app.sync_component::<Wireframe>();
+    app.sync_component::<PointLight>();
+    app.sync_component::<Handle<StandardMaterial>>();
+    app.sync_component::<Handle<Mesh>>();
+    app.sync_materials(true);
+    app.sync_meshes(true);
+
+    let localhost = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+    let port = 4000;
     match &args.command {
-        Command::Join { ip: _ } => todo!(),
         Command::Host {
-            world_file,
+            world_file: _,
             headless: _,
-        } => {
-            let loaded = ass.load(world_file.to_owned() + "#Scene0");
-            commands.spawn(SceneBundle {
-                scene: loaded,
-                ..Default::default()
-            });
+        } => app.add_plugins(ServerPlugin {
+            ip: localhost,
+            port,
+        }),
+        Command::Join { ip } => app.add_plugins(ClientPlugin {
+            ip: ip.clone().to_owned(),
+            port,
+        }),
+    };
+}
+
+#[derive(Component)]
+struct LoadedSceneItem;
+
+fn loaded_scene_item_propagate(
+    query: Query<(Entity, &Children), With<LoadedSceneItem>>,
+    mut commands: Commands,
+) {
+    for (e, childs) in query.iter() {
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<LoadedSceneItem>()
+            .insert(SyncMark);
+        for c in childs {
+            commands
+                .get_entity(*c)
+                .unwrap()
+                .insert(LoadedSceneItem)
+                .insert(SyncMark);
         }
+    }
+}
+
+fn loaded_scene_item_cleanup(
+    query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>,
+    mut commands: Commands,
+) {
+    for e in query.iter() {
+        commands.get_entity(e).unwrap().remove::<LoadedSceneItem>();
+    }
+}
+
+fn load_world_from_args(args: Res<Args>, assets: Res<AssetServer>, mut commands: Commands) {
+    if let Command::Host {
+        world_file,
+        headless: _,
+    } = &args.command
+    {
+        let scene = assets.load(world_file.to_owned() + "#Scene0");
+        commands.spawn((
+            SceneBundle {
+                scene,
+                ..Default::default()
+            },
+            LoadedSceneItem,
+        ));
     }
 }

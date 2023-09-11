@@ -1,4 +1,4 @@
-use std::net::Ipv4Addr;
+use std::net::IpAddr;
 
 use bevy::prelude::Resource;
 use clap::{Parser, Subcommand};
@@ -19,5 +19,5 @@ pub enum Command {
         headless: bool,
     },
     #[clap(name = "join")]
-    Join { ip: Ipv4Addr },
+    Join { ip: IpAddr },
 }
