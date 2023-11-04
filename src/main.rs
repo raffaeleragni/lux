@@ -10,7 +10,8 @@ use std::{
 use bevy::{
     app::ScheduleRunnerPlugin, pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb,
 };
-use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncDown, SyncMark, SyncPlugin};
+use bevy_openxr::OpenXrPlugin;
+use bevy_sync::prelude::*;
 use clap::Parser;
 use cli::{Args, Command};
 
@@ -24,6 +25,7 @@ fn main() {
         }) => headless,
         _ => false,
     };
+
     app.insert_resource(args.clone());
 
     if headless {
@@ -32,9 +34,13 @@ fn main() {
             Duration::from_secs_f64(1.0 / 60.0),
         )));
     } else {
+        if args.xr_enabled.unwrap_or(false) {
+            app.add_plugins(OpenXrPlugin);
+        }
         app.add_plugins(DefaultPlugins);
         app.add_plugins(bevy_editor_pls::EditorPlugin::default());
         app.add_plugins(menu::MenuPlugin);
+
         layouts::setup(&mut app);
     }
 
@@ -54,7 +60,9 @@ fn main() {
 }
 
 fn setup_sync(args: Args, app: &mut App) {
-    if let None = args.command {return;}
+    if args.command.is_none() {
+        return;
+    }
     app.add_plugins(SyncPlugin);
     app.sync_component::<Name>();
     app.sync_component::<Aabb>();

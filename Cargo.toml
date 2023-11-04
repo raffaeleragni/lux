@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.11.0" }
-bevy_egui = { version = "0.22.0" }
-bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls.git", branch = "main" }
+bevy = { version = "0.12" }
+bevy_egui = { git = "https://github.com/raffaeleragni/bevy_egui.git", branch = "bevy_0_12" }
+bevy_editor_pls = { git = "https://github.com/raffaeleragni/bevy_editor_pls.git", branch = "bevy_0_12" }
+bevy_sync = { git = "https://github.com/raffaeleragni/bevy_sync.git", branch = "bevy_0_12" }
+bevy_openxr = { git = "https://github.com/raffaeleragni/bevy_openxr.git", branch = "bevy_0_12" }
 clap = { version = "4.3.0", features = ["derive"] }
 serde = { version = "1.0.160", features = ["derive"] }
-bevy_sync = "0.1.9"
 components = { path = "components" }
 
 # Enable a small amount of optimization in debug mode

@@ -6,6 +6,8 @@ use clap::{Parser, Subcommand};
 #[derive(Parser, Clone, Debug, Resource)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
+    #[arg(name = "xr")]
+    pub xr_enabled: Option<bool>,
     #[clap(subcommand)]
     pub command: Option<Command>,
 }
