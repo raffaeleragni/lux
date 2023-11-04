@@ -18,10 +18,10 @@ fn main() {
     let mut app = App::new();
     let args = Args::parse();
     let headless = match args.command {
-        Command::Host {
+        Some(Command::Host {
             world_file: _,
             headless,
-        } => headless,
+        }) => headless,
         _ => false,
     };
     app.insert_resource(args.clone());
@@ -54,6 +54,7 @@ fn main() {
 }
 
 fn setup_sync(args: Args, app: &mut App) {
+    if let None = args.command {return;}
     app.add_plugins(SyncPlugin);
     app.sync_component::<Name>();
     app.sync_component::<Aabb>();
@@ -69,17 +70,18 @@ fn setup_sync(args: Args, app: &mut App) {
     let localhost = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
     let port = 4000;
     match &args.command {
-        Command::Host {
+        Some(Command::Host {
             world_file: _,
             headless: _,
-        } => app.add_plugins(ServerPlugin {
+        }) => app.add_plugins(ServerPlugin {
             ip: localhost,
             port,
         }),
-        Command::Join { ip } => app.add_plugins(ClientPlugin {
+        Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
             ip: ip.clone().to_owned(),
             port,
         }),
+        _ => app,
     };
 }
 
@@ -116,10 +118,10 @@ fn loaded_scene_item_cleanup(
 }
 
 fn load_world_from_args(args: Res<Args>, assets: Res<AssetServer>, mut commands: Commands) {
-    if let Command::Host {
+    if let Some(Command::Host {
         world_file,
         headless: _,
-    } = &args.command
+    }) = &args.command
     {
         let scene = assets.load(world_file.to_owned() + "#Scene0");
         commands.spawn((
