@@ -10,7 +10,7 @@ use std::{
 use bevy::{
     app::ScheduleRunnerPlugin, pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb,
 };
-use bevy_openxr::OpenXrPlugin;
+use bevy_openxr::DefaultXrPlugins;
 use bevy_sync::prelude::*;
 use clap::Parser;
 use cli::{Args, Command};
@@ -34,10 +34,11 @@ fn main() {
             Duration::from_secs_f64(1.0 / 60.0),
         )));
     } else {
-        if args.xr_enabled.unwrap_or(false) {
-            app.add_plugins(OpenXrPlugin);
+        if args.xr_enabled {
+            app.add_plugins(DefaultXrPlugins);
+        } else {
+            app.add_plugins(DefaultPlugins);
         }
-        app.add_plugins(DefaultPlugins);
         app.add_plugins(bevy_editor_pls::EditorPlugin::default());
         app.add_plugins(menu::MenuPlugin);
 
