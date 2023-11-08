@@ -10,7 +10,7 @@ use std::{
 use bevy::{
     app::ScheduleRunnerPlugin, pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb,
 };
-use bevy_openxr::DefaultXrPlugins;
+use bevy_oxr::DefaultXrPlugins;
 use bevy_sync::prelude::*;
 use clap::Parser;
 use cli::{Args, Command};
