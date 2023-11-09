@@ -56,6 +56,12 @@ jobs:
           .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --default-toolchain=none
           del rustup-init.exe
           rustup target add x86_64-pc-windows-msvc
+      - name: "Install NuGet"
+        uses: nuget/setup-nuget@v1
+      - name: "Install openxr loader"
+        shell: powershell
+        run: |
+          NuGet\Install-Package OpenXR.Loader -Version 1.0.10.2
       - name: "Checks"
         shell: cmd
         run: |
