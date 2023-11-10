@@ -92,6 +92,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           prefix-key: "max-"
+      - name: "Install dependencies"
+        run: |
+          brew install pkg-config
+          brew install openxr-loader
       - name: "Checks"
         run: |
           cargo fmt --check
