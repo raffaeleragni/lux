@@ -7,8 +7,8 @@ edition = "2021"
 bevy = { version = "0.12" }
 bevy_egui = "0.23.0"
 bevy_sync = { git = "https://github.com/raffaeleragni/bevy_sync.git" }
-bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
-bevy_oxr = { git = "https://github.com/raffaeleragni/bevy_openxr.git" }
+bevy_editor_pls = "0.6"
+bevy_oxr = "0.1.0"
 clap = { version = "4.3.0", features = ["derive"] }
 serde = { version = "1.0.160", features = ["derive"] }
 components = { path = "components" }
