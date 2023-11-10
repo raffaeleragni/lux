@@ -6,6 +6,9 @@ use clap::{Parser, Subcommand};
 #[derive(Parser, Clone, Debug, Resource)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
+    /// Enable XR/VR
+    #[clap(name = "xr", long, default_value_t = false)]
+    pub xr_enabled: bool,
     #[clap(subcommand)]
     pub command: Option<Command>,
 }
@@ -15,7 +18,7 @@ pub enum Command {
     #[clap(name = "host")]
     Host {
         world_file: String,
-        #[clap(long, action, default_value_t = false)]
+        #[clap(long, default_value_t = false)]
         headless: bool,
     },
     #[clap(name = "join")]

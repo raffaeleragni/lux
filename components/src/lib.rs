@@ -1,3 +1,1 @@
-use bevy::prelude::*;
-
-pub fn register(_: &mut App) {}
+pub fn register(_: &mut bevy::prelude::App) {}

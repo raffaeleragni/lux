@@ -8,6 +8,7 @@ on:
       - "README.md"
   pull_request:
     paths-ignore:
+      - "docs/*"
       - "README.md"
 jobs:
   linux:
@@ -20,7 +21,7 @@ jobs:
         with:
           prefix-key: "linux-"
       - name: "External dependencies"
-        run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev libudev-dev
+        run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev libudev-dev libopenxr-loader1 libopenxr-dev
       - name: "Checks"
         run: |
           cargo fmt --check
@@ -56,6 +57,15 @@ jobs:
           .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --default-toolchain=none
           del rustup-init.exe
           rustup target add x86_64-pc-windows-msvc
+      - name: "Install NuGet"
+        uses: nuget/setup-nuget@v1        
+        with:
+          #nuget-api-key: ${{ secrets.NuGetAPIKey }}
+          nuget-version: '5.x'
+      - name: "Install openxr loader"
+        shell: powershell
+        run: |
+          NuGet Install OpenXR.Loader -Version 1.0.10.2
       - name: "Checks"
         shell: cmd
         run: |
@@ -74,28 +84,32 @@ jobs:
         with:
           name: windows-lux
           path: target/release/lux.exe
-  mac:
-    runs-on: macos-latest
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v3
-      - name: "Cache"
-        uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: "max-"
-      - name: "Checks"
-        run: |
-          cargo fmt --check
-          cargo clippy --no-deps --tests -- -D warnings
-      - name: "Test"
-        run: |
-          cargo test
-      - name: "Build"
-        run: |
-          cargo build --release
-      - name: "Upload"    
-        uses: actions/upload-artifact@v3
-        with:
-          name: mac-lux
-          path: target/release/lux
+# mac has no OpenXR support
+#mac:
+#    runs-on: macos-latest
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v3
+#      - name: "Cache"
+#        uses: Swatinem/rust-cache@v2
+#        with:
+#          prefix-key: "max-"
+#      - name: "Install dependencies"
+#        run: |
+#          brew install openxr-loader
+#      - name: "Checks"
+#        run: |
+#          cargo fmt --check
+#          cargo clippy --no-deps --tests -- -D warnings
+#      - name: "Test"
+#        run: |
+#          cargo test
+#      - name: "Build"
+#        run: |
+#          cargo build --release
+#      - name: "Upload"    
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: mac-lux
+#          path: target/release/lux
 
