@@ -1,5 +1,7 @@
 # LUX
 
+![build](https://github.com/raffaeleragni/lux/actions/workflows/build.yml/badge.svg)
+
 A platform for creative virtual environments.
 
 More docs:
