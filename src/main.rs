@@ -1,6 +1,8 @@
 mod cli;
+mod initial;
 mod layouts;
 mod menu;
+mod xr;
 
 use std::{
     net::{IpAddr, Ipv4Addr},
@@ -9,16 +11,6 @@ use std::{
 
 use bevy::{
     app::ScheduleRunnerPlugin, pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb,
-    utils::Uuid,
-};
-use bevy_oxr::{
-    xr_input::{
-        interactions::{XRDirectInteractor, XRInteractorState, XRRayInteractor},
-        trackers::{
-            AimPose, OpenXRController, OpenXRLeftController, OpenXRRightController, OpenXRTracker,
-        },
-    },
-    DefaultXrPlugins,
 };
 use bevy_sync::prelude::*;
 use clap::Parser;
@@ -44,9 +36,8 @@ fn main() {
         )));
     } else {
         if args.xr_enabled {
-            app.add_plugins(DefaultXrPlugins);
-            app.add_systems(Startup, spawn_controllers);
-        } else {
+            xr::init(&mut app);
+       } else {
             app.add_plugins(DefaultPlugins);
         }
         app.add_plugins(bevy_editor_pls::EditorPlugin::default());
@@ -58,49 +49,8 @@ fn main() {
     setup_sync(args.clone(), &mut app);
 
     components::register(&mut app);
-    app.add_systems(
-        Startup,
-        load_world_from_args.run_if(resource_exists::<Args>()),
-    );
-
-    app.add_systems(
-        Update,
-        (loaded_scene_item_propagate, loaded_scene_item_cleanup),
-    );
+    initial::init(&mut app);
     app.run();
-}
-
-fn spawn_controllers(mut commands: Commands) {
-    commands.spawn((
-        OpenXRLeftController,
-        OpenXRController,
-        OpenXRTracker,
-        SpatialBundle::default(),
-        XRRayInteractor,
-        AimPose(Transform::default()),
-        XRInteractorState::default(),
-    ));
-    commands.spawn((
-        OpenXRRightController,
-        OpenXRController,
-        OpenXRTracker,
-        SpatialBundle::default(),
-        XRDirectInteractor,
-        XRInteractorState::default(),
-    ));
-}
-
-trait AddByUuid<A: Asset> {
-    fn addu(&mut self, asset: A) -> Handle<A>;
-}
-impl<A: Asset> AddByUuid<A> for Assets<A> {
-    fn addu(&mut self, asset: A) -> Handle<A> {
-        let id = AssetId::Uuid {
-            uuid: Uuid::new_v4(),
-        };
-        self.insert(id, asset);
-        Handle::<A>::Weak(id)
-    }
 }
 
 fn setup_sync(args: Args, app: &mut App) {
@@ -137,82 +87,3 @@ fn setup_sync(args: Args, app: &mut App) {
     };
 }
 
-#[derive(Component)]
-struct LoadedSceneItem;
-
-fn loaded_scene_item_propagate(
-    query: Query<(Entity, &Children), With<LoadedSceneItem>>,
-    mut commands: Commands,
-) {
-    for (e, childs) in query.iter() {
-        commands
-            .get_entity(e)
-            .unwrap()
-            .remove::<LoadedSceneItem>()
-            .insert(SyncMark);
-        for c in childs {
-            commands
-                .get_entity(*c)
-                .unwrap()
-                .insert(LoadedSceneItem)
-                .insert(SyncMark);
-        }
-    }
-}
-
-fn loaded_scene_item_cleanup(
-    query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>,
-    mut commands: Commands,
-) {
-    for e in query.iter() {
-        commands.get_entity(e).unwrap().remove::<LoadedSceneItem>();
-    }
-}
-
-fn load_world_from_args(
-    args: Res<Args>,
-    assets: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut commands: Commands,
-) {
-    match &args.command {
-        Some(Command::Host {
-            world_file,
-            headless: _,
-        }) => {
-            let scene = assets.load(world_file.to_owned() + "#Scene0");
-            commands.spawn((
-                SceneBundle {
-                    scene,
-                    ..Default::default()
-                },
-                LoadedSceneItem,
-            ));
-        }
-        _ => {
-            commands.spawn((
-                PbrBundle {
-                    mesh: meshes.addu(shape::Plane::from_size(50.0).into()),
-                    material: materials.addu(Color::rgb(0.3, 0.5, 0.3).into()),
-                    ..default()
-                },
-                SyncMark,
-                Name::new("Ground"),
-                SyncExclude::<Name>::default(),
-            ));
-            commands.spawn((
-                PointLightBundle {
-                    transform: Transform::from_xyz(4.0, 8.0, 4.0),
-                    ..default()
-                },
-                SyncMark,
-                Name::new("Light"),
-            ));
-            commands.spawn(Camera3dBundle {
-                transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-                ..default()
-            });
-        }
-    }
-}
