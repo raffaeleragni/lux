@@ -1,8 +1,7 @@
 mod cli;
-mod initial;
-mod layouts;
-mod menu;
+mod desktop;
 mod networking;
+mod world;
 mod xr;
 
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
@@ -34,15 +33,12 @@ fn main() {
         } else {
             app.add_plugins(DefaultPlugins);
         }
-        app.add_plugins(bevy_editor_pls::EditorPlugin::default());
-        app.add_plugins(menu::MenuPlugin);
-
-        layouts::setup(&mut app);
+        desktop::init(&mut app);
     }
 
-    networking::init(args, &mut app);
-
+    networking::init(&args, &mut app);
     components::register(&mut app);
-    initial::init(&mut app);
+    world::init(&mut app);
+
     app.run();
 }
