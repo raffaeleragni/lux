@@ -54,6 +54,31 @@ fn noclip_movement(
             t.translation.z += clip.speed * time.delta_seconds();
         }
     }
+    if input.pressed(KeyCode::S) {
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.z -= clip.speed * time.delta_seconds();
+        }
+    }
+    if input.pressed(KeyCode::A) {
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.x -= clip.speed * time.delta_seconds();
+        }
+    }
+    if input.pressed(KeyCode::D) {
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.x += clip.speed * time.delta_seconds();
+        }
+    }
+    if input.pressed(KeyCode::Space) {
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.y += clip.speed * time.delta_seconds();
+        }
+    }
+    if input.pressed(KeyCode::ControlLeft) {
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.y -= clip.speed * time.delta_seconds();
+        }
+    }
 }
 
 #[cfg(test)]
@@ -79,6 +104,56 @@ mod test {
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 1.0);
+    }
+
+    #[test]
+    fn move_backward() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::S, 1.0);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, -1.0);
+    }
+
+    #[test]
+    fn move_left() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::A, 1.0);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, -1.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 0.0);
+    }
+
+    #[test]
+    fn move_right() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::D, 1.0);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 1.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 0.0);
+    }
+
+    #[test]
+    fn move_up() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::Space, 1.0);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 1.0);
+        assert_eq!(pos.translation.z, 0.0);
+    }
+
+    #[test]
+    fn move_down() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::ControlLeft, 1.0);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, -1.0);
+        assert_eq!(pos.translation.z, 0.0);
     }
 
     #[test]
