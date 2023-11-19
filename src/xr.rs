@@ -35,4 +35,3 @@ fn spawn_xr_entities(mut commands: Commands) {
         XRInteractorState::default(),
     ));
 }
-

@@ -107,4 +107,3 @@ fn spawn_empty_world(
         Name::new("Light"),
     ));
 }
-

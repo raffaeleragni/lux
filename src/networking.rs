@@ -1,7 +1,7 @@
 use std::net::{IpAddr, Ipv4Addr};
 
-use bevy::{prelude::*, render::primitives::Aabb, pbr::wireframe::Wireframe};
-use bevy_sync::{SyncComponent, SyncPlugin, ClientPlugin, ServerPlugin};
+use bevy::{pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb};
+use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
 
 use crate::cli::{Args, Command};
 
@@ -43,4 +43,3 @@ fn setup_sync(args: &Args, app: &mut App) {
         _ => app,
     };
 }
-
