@@ -47,34 +47,35 @@ impl Default for NoClip {
 fn noclip_movement(
     mut query: Query<(&mut Transform, &NoClip)>,
     input: Res<Input<KeyCode>>,
+    maps: Res<KeyMaps>,
     time: Res<Time>,
 ) {
-    if input.pressed(KeyCode::W) {
+    if input.pressed(maps.forward) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.z += clip.speed * time.delta_seconds();
         }
     }
-    if input.pressed(KeyCode::S) {
+    if input.pressed(maps.backward) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.z -= clip.speed * time.delta_seconds();
         }
     }
-    if input.pressed(KeyCode::A) {
+    if input.pressed(maps.left) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.x -= clip.speed * time.delta_seconds();
         }
     }
-    if input.pressed(KeyCode::D) {
+    if input.pressed(maps.right) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.x += clip.speed * time.delta_seconds();
         }
     }
-    if input.pressed(KeyCode::Space) {
+    if input.pressed(maps.up) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.y += clip.speed * time.delta_seconds();
         }
     }
-    if input.pressed(KeyCode::ControlLeft) {
+    if input.pressed(maps.down) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.y -= clip.speed * time.delta_seconds();
         }
