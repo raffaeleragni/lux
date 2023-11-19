@@ -43,10 +43,10 @@ impl Default for NoClip {
     }
 }
 
-fn noclip_movement(mut query: Query<&mut Transform, With<NoClip>>, input: Res<Input<KeyCode>>) {
+fn noclip_movement(mut query: Query<(&mut Transform, &NoClip)>, input: Res<Input<KeyCode>>) {
     if input.pressed(KeyCode::W) {
-        for mut t in query.iter_mut() {
-            t.translation.z += 1f32;
+        for (mut t, clip) in query.iter_mut() {
+            t.translation.z += 1f32 * clip.speed;
         }
     }
 }
@@ -59,7 +59,7 @@ mod test {
 
     #[test]
     fn initial_state() {
-        let mut app = setup();
+        let mut app = setup(1f32);
         let pos = get_camera_position(&mut app);
         assert_eq!(pos.translation.x, 0f32);
         assert_eq!(pos.translation.y, 0f32);
@@ -68,13 +68,24 @@ mod test {
 
     #[test]
     fn move_forward() {
-        let mut app = setup();
+        let mut app = setup(1f32);
         press(&mut app, KeyCode::W);
         let pos = get_camera_position(&mut app);
         assert_eq!(pos.translation.x, 0f32);
         assert_eq!(pos.translation.y, 0f32);
         // TODO 1 is not enough, needs to be proportional to time pressed
         assert_eq!(pos.translation.z, 1f32);
+    }
+
+    #[test]
+    fn consider_speed() {
+        let mut app = setup(2f32);
+        press(&mut app, KeyCode::W);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 0f32);
+        assert_eq!(pos.translation.y, 0f32);
+        // TODO 1 is not enough, needs to be proportional to time pressed
+        assert_eq!(pos.translation.z, 2f32);
     }
 
     fn press(app: &mut App, k: KeyCode) {
@@ -87,7 +98,7 @@ mod test {
         app.update();
     }
 
-    fn setup() -> App {
+    fn setup(speed: f32) -> App {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins);
         app.add_plugins(InputPlugin);
@@ -95,7 +106,7 @@ mod test {
         app.world.spawn((
             SpatialBundle::default(),
             Camera3d::default(),
-            NoClip::default(),
+            NoClip { speed },
         ));
         app
     }
