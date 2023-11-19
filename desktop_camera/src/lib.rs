@@ -50,6 +50,9 @@ fn noclip_movement(
     maps: Res<KeyMaps>,
     time: Res<Time>,
 ) {
+    if query.is_empty() {
+        return;
+    }
     if input.pressed(maps.forward) {
         for (mut t, clip) in query.iter_mut() {
             t.translation.z += clip.speed * time.delta_seconds();
