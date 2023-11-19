@@ -5,6 +5,7 @@ pub struct DesktopCameraPlugin;
 impl Plugin for DesktopCameraPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(KeyMaps::default());
+        app.add_systems(PreUpdate, noclip_movement);
     }
 }
 
@@ -39,6 +40,14 @@ pub struct NoClip {
 impl Default for NoClip {
     fn default() -> Self {
         Self { speed: 1f32 }
+    }
+}
+
+fn noclip_movement(mut query: Query<&mut Transform, With<NoClip>>, input: Res<Input<KeyCode>>) {
+    if input.pressed(KeyCode::W) {
+        for mut t in query.iter_mut() {
+            t.translation.z += 1f32;
+        }
     }
 }
 
