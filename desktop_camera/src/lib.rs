@@ -34,6 +34,7 @@ impl Default for KeyMaps {
 
 #[derive(Component)]
 pub struct NoClip {
+    /// Movement speed in units per second
     pub speed: f32,
 }
 
@@ -43,55 +44,69 @@ impl Default for NoClip {
     }
 }
 
-fn noclip_movement(mut query: Query<(&mut Transform, &NoClip)>, input: Res<Input<KeyCode>>) {
+fn noclip_movement(
+    mut query: Query<(&mut Transform, &NoClip)>,
+    input: Res<Input<KeyCode>>,
+    time: Res<Time>,
+) {
     if input.pressed(KeyCode::W) {
         for (mut t, clip) in query.iter_mut() {
-            t.translation.z += 1f32 * clip.speed;
+            t.translation.z += clip.speed * time.delta_seconds();
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use bevy::input::InputPlugin;
-
     use super::*;
+    use bevy::{input::InputPlugin, time::TimePlugin};
+    use std::time::Duration;
 
     #[test]
     fn initial_state() {
-        let mut app = setup(1f32);
+        let mut app = setup(1.0);
         let pos = get_camera_position(&mut app);
-        assert_eq!(pos.translation.x, 0f32);
-        assert_eq!(pos.translation.y, 0f32);
-        assert_eq!(pos.translation.z, 0f32);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 0.0);
     }
 
     #[test]
     fn move_forward() {
-        let mut app = setup(1f32);
-        press(&mut app, KeyCode::W);
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::W, 1.0);
         let pos = get_camera_position(&mut app);
-        assert_eq!(pos.translation.x, 0f32);
-        assert_eq!(pos.translation.y, 0f32);
-        // TODO 1 is not enough, needs to be proportional to time pressed
-        assert_eq!(pos.translation.z, 1f32);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 1.0);
     }
 
     #[test]
     fn consider_speed() {
-        let mut app = setup(2f32);
-        press(&mut app, KeyCode::W);
+        let mut app = setup(2.0);
+        press(&mut app, KeyCode::W, 1.0);
         let pos = get_camera_position(&mut app);
-        assert_eq!(pos.translation.x, 0f32);
-        assert_eq!(pos.translation.y, 0f32);
-        // TODO 1 is not enough, needs to be proportional to time pressed
-        assert_eq!(pos.translation.z, 2f32);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 2.0);
     }
 
-    fn press(app: &mut App, k: KeyCode) {
+    #[test]
+    fn consider_time() {
+        let mut app = setup(1.0);
+        press(&mut app, KeyCode::W, 1.5);
+        let pos = get_camera_position(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 1.5);
+    }
+
+    fn press(app: &mut App, k: KeyCode, time_ms: f32) {
         let input = &mut app.world.resource_mut::<Input<KeyCode>>();
         input.press(k);
-        // TODO need to tell beyv how much time is elapsed between updates
+        app.world
+            .resource_mut::<Time>()
+            .advance_by(Duration::from_secs_f32(time_ms));
         app.update();
         let input = &mut app.world.resource_mut::<Input<KeyCode>>();
         input.release(k);
@@ -100,21 +115,20 @@ mod test {
 
     fn setup(speed: f32) -> App {
         let mut app = App::new();
-        app.add_plugins(MinimalPlugins);
+        app.add_plugins(MinimalPlugins.build().disable::<TimePlugin>());
         app.add_plugins(InputPlugin);
         app.add_plugins(DesktopCameraPlugin);
-        app.world.spawn((
-            SpatialBundle::default(),
-            Camera3d::default(),
-            NoClip { speed },
-        ));
+        app.world
+            .spawn((SpatialBundle::default(), NoClip { speed }));
+        app.insert_resource::<Time>(Time::new_with(()));
+        app.update();
         app
     }
 
     fn get_camera_position(app: &mut App) -> &Transform {
         return app
             .world
-            .query_filtered::<&Transform, With<Camera3d>>()
+            .query_filtered::<&Transform, With<NoClip>>()
             .iter(&app.world)
             .next()
             .unwrap();
