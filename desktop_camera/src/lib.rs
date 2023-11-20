@@ -1,11 +1,11 @@
-use bevy::prelude::*;
+use bevy::{input::mouse::MouseMotion, prelude::*};
 
 pub struct DesktopCameraPlugin;
 
 impl Plugin for DesktopCameraPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(KeyMaps::default());
-        app.add_systems(PreUpdate, noclip_movement);
+        app.add_systems(PreUpdate, (noclip_movement, noclip_look));
     }
 }
 
@@ -36,11 +36,19 @@ impl Default for KeyMaps {
 pub struct NoClip {
     /// Movement speed in units per second
     pub speed: f32,
+    pub mouse_speed: f32,
+    pub mouse_vertical: f32,
+    pub mouse_horizontal: f32,
 }
 
 impl Default for NoClip {
     fn default() -> Self {
-        Self { speed: 1f32 }
+        Self {
+            speed: 1.0,
+            mouse_speed: 10.0,
+            mouse_vertical: 0.0,
+            mouse_horizontal: 0.0,
+        }
     }
 }
 
@@ -85,16 +93,45 @@ fn noclip_movement(
     }
 }
 
+fn noclip_look(
+    mut query: Query<(&mut Transform, &mut NoClip)>,
+    mut mouse: EventReader<MouseMotion>,
+    time: Res<Time>,
+) {
+    if query.is_empty() {
+        return;
+    }
+    let mut total = Vec2::ZERO;
+    for motion in mouse.read() {
+        total += motion.delta;
+    }
+    if total == Vec2::ZERO {
+        return;
+    }
+    for (mut t, mut clip) in query.iter_mut() {
+        let y = clip.mouse_speed * time.delta_seconds() * total.y;
+        let x = clip.mouse_speed * time.delta_seconds() * total.x;
+        clip.mouse_vertical += y;
+        clip.mouse_horizontal -= x;
+        clip.mouse_vertical = clip.mouse_vertical.clamp(-90.0, 90.0);
+        t.rotation = Quat::from_axis_angle(Vec3::Y, clip.mouse_horizontal.to_radians())
+            * Quat::from_axis_angle(-Vec3::X, clip.mouse_vertical.to_radians());
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use bevy::{input::InputPlugin, time::TimePlugin};
+    use bevy::{
+        input::{mouse::MouseMotion, InputPlugin},
+        time::TimePlugin,
+    };
     use std::time::Duration;
 
     #[test]
     fn initial_state() {
-        let mut app = setup(1.0);
-        let pos = get_camera_position(&mut app);
+        let mut app = setup(1.0, 10.0);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 0.0);
@@ -102,9 +139,9 @@ mod test {
 
     #[test]
     fn move_forward() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::W, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 1.0);
@@ -112,9 +149,9 @@ mod test {
 
     #[test]
     fn move_backward() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::S, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, -1.0);
@@ -122,9 +159,9 @@ mod test {
 
     #[test]
     fn move_left() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::A, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, -1.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 0.0);
@@ -132,9 +169,9 @@ mod test {
 
     #[test]
     fn move_right() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::D, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 1.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 0.0);
@@ -142,9 +179,9 @@ mod test {
 
     #[test]
     fn move_up() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::Space, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 1.0);
         assert_eq!(pos.translation.z, 0.0);
@@ -152,9 +189,9 @@ mod test {
 
     #[test]
     fn move_down() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::ControlLeft, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, -1.0);
         assert_eq!(pos.translation.z, 0.0);
@@ -162,9 +199,9 @@ mod test {
 
     #[test]
     fn consider_speed() {
-        let mut app = setup(2.0);
+        let mut app = setup(2.0, 10.0);
         press(&mut app, KeyCode::W, 1.0);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 2.0);
@@ -172,12 +209,66 @@ mod test {
 
     #[test]
     fn consider_time() {
-        let mut app = setup(1.0);
+        let mut app = setup(1.0, 10.0);
         press(&mut app, KeyCode::W, 1.5);
-        let pos = get_camera_position(&mut app);
+        let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
         assert_eq!(pos.translation.z, 1.5);
+    }
+
+    #[test]
+    fn no_rotation() {
+        let mut app = setup(1.0, 10.0);
+        mouse_move(&mut app, Vec2::new(0.0, 0.0), 1.0);
+        let rot = get_camera(&mut app);
+        assert_eq!(rot.rotation.x, 0.0);
+        assert_eq!(rot.rotation.y, 0.0);
+        assert_eq!(rot.rotation.z, 0.0);
+    }
+
+    #[test]
+    fn rotate_up() {
+        let mut app = setup(1.0, 10.0);
+        mouse_move(&mut app, Vec2::new(0.0, 1.0), 1.0);
+        let rot = get_camera(&mut app);
+        assert_eq!(
+            rot.rotation,
+            Quat::from_axis_angle(-Vec3::X, 10f32.to_radians())
+        );
+    }
+
+    #[test]
+    fn rotate_down() {
+        let mut app = setup(1.0, 10.0);
+        mouse_move(&mut app, Vec2::new(0.0, -1.0), 1.0);
+        let rot = get_camera(&mut app);
+        assert_eq!(
+            rot.rotation,
+            Quat::from_axis_angle(-Vec3::X, -10f32.to_radians())
+        );
+    }
+
+    #[test]
+    fn rotate_left() {
+        let mut app = setup(1.0, 10.0);
+        mouse_move(&mut app, Vec2::new(1.0, 0.0), 1.0);
+        let rot = get_camera(&mut app);
+        assert_eq!(
+            rot.rotation,
+            Quat::from_axis_angle(Vec3::Y, -10f32.to_radians())
+        );
+    }
+
+    #[test]
+    fn rotate_right() {
+        let mut app = setup(1.0, 10.0);
+        mouse_move(&mut app, Vec2::new(-1.0, 0.0), 1.0);
+        let rot = get_camera(&mut app);
+        assert_eq!(
+            rot.rotation,
+            Quat::from_axis_angle(Vec3::Y, 10f32.to_radians())
+        );
     }
 
     fn press(app: &mut App, k: KeyCode, time_ms: f32) {
@@ -192,19 +283,34 @@ mod test {
         app.update();
     }
 
-    fn setup(speed: f32) -> App {
+    fn mouse_move(app: &mut App, delta: Vec2, time_ms: f32) {
+        app.world.send_event(MouseMotion { delta });
+        app.world
+            .resource_mut::<Time>()
+            .advance_by(Duration::from_secs_f32(time_ms));
+        app.update();
+    }
+
+    fn setup(speed: f32, mouse_speed: f32) -> App {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins.build().disable::<TimePlugin>());
         app.add_plugins(InputPlugin);
         app.add_plugins(DesktopCameraPlugin);
-        app.world
-            .spawn((SpatialBundle::default(), NoClip { speed }));
+        app.world.spawn((
+            SpatialBundle::default(),
+            NoClip {
+                speed,
+                mouse_speed,
+                mouse_vertical: 0.0,
+                mouse_horizontal: 0.0,
+            },
+        ));
         app.insert_resource::<Time>(Time::new_with(()));
         app.update();
         app
     }
 
-    fn get_camera_position(app: &mut App) -> &Transform {
+    fn get_camera(app: &mut App) -> &Transform {
         return app
             .world
             .query_filtered::<&Transform, With<NoClip>>()
