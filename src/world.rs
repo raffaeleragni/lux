@@ -99,6 +99,16 @@ fn spawn_empty_world(
         Name::new("Ground"),
     ));
     commands.spawn((
+        PbrBundle {
+            mesh: meshes.addu(Mesh::from(shape::Cube { size: 1.0 })),
+            material: materials.addu(Color::rgb(0.8, 0.7, 0.6).into()),
+            transform: Transform::from_xyz(0.0, 0.5, 1.0),
+            ..default()
+        },
+        SyncMark,
+        Name::new("Cube"),
+    ));
+    commands.spawn((
         PointLightBundle {
             transform: Transform::from_xyz(4.0, 8.0, 4.0),
             ..default()
