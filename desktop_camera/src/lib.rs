@@ -56,9 +56,14 @@ fn forward(rot: &Quat) -> Vec3 {
     rot.mul_vec3(Vec3::Z).normalize()
 }
 
-fn left(rot: &Quat) -> Vec3 {
+fn forward_noy(rot: &Quat) -> Vec3 {
+    let v = forward(rot);
+    Vec3::new(v.x, 0.0, v.z).normalize()
+}
+
+fn right(rot: &Quat) -> Vec3 {
     Quat::from_rotation_y(90.0f32.to_radians())
-        .mul_vec3(forward(rot))
+        .mul_vec3(forward_noy(rot))
         .normalize()
 }
 
@@ -80,10 +85,10 @@ fn noclip_movement(
             direction -= forward(&t.rotation);
         }
         if input.pressed(maps.left) {
-            direction -= left(&t.rotation);
+            direction -= right(&t.rotation);
         }
         if input.pressed(maps.right) {
-            direction += left(&t.rotation);
+            direction += right(&t.rotation);
         }
         if input.pressed(maps.up) {
             direction += Vec3::Y;
