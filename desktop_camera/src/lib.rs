@@ -52,6 +52,16 @@ impl Default for NoClip {
     }
 }
 
+fn forward(rot: &Quat) -> Vec3 {
+    rot.mul_vec3(Vec3::Z).normalize()
+}
+
+fn left(rot: &Quat) -> Vec3 {
+    Quat::from_rotation_y(90.0f32.to_radians())
+        .mul_vec3(forward(rot))
+        .normalize()
+}
+
 fn noclip_movement(
     mut query: Query<(&mut Transform, &NoClip)>,
     input: Res<Input<KeyCode>>,
@@ -61,35 +71,31 @@ fn noclip_movement(
     if query.is_empty() {
         return;
     }
-    if input.pressed(maps.forward) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.z += clip.speed * time.delta_seconds();
+    for (mut t, clip) in query.iter_mut() {
+        let mut direction = Vec3::ZERO;
+        if input.pressed(maps.forward) {
+            direction += forward(&t.rotation);
         }
-    }
-    if input.pressed(maps.backward) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.z -= clip.speed * time.delta_seconds();
+        if input.pressed(maps.backward) {
+            direction -= forward(&t.rotation);
         }
-    }
-    if input.pressed(maps.left) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.x -= clip.speed * time.delta_seconds();
+        if input.pressed(maps.left) {
+            direction -= left(&t.rotation);
         }
-    }
-    if input.pressed(maps.right) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.x += clip.speed * time.delta_seconds();
+        if input.pressed(maps.right) {
+            direction += left(&t.rotation);
         }
-    }
-    if input.pressed(maps.up) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.y += clip.speed * time.delta_seconds();
+        if input.pressed(maps.up) {
+            direction += Vec3::Y;
         }
-    }
-    if input.pressed(maps.down) {
-        for (mut t, clip) in query.iter_mut() {
-            t.translation.y -= clip.speed * time.delta_seconds();
+        if input.pressed(maps.down) {
+            direction -= Vec3::Y;
         }
+        direction = direction.normalize();
+        if direction.is_nan() {
+            continue;
+        }
+        t.translation += direction * clip.speed * time.delta_seconds();
     }
 }
 
@@ -271,6 +277,28 @@ mod test {
         );
     }
 
+    #[test]
+    fn move_left_rotated() {
+        let mut app = setup(1.0, 10.0);
+        mouse_rotated(&mut app, Quat::from_rotation_y(90.0f32.to_radians()));
+        press(&mut app, KeyCode::A, 1.0);
+        let pos = get_camera(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, 1.0);
+    }
+
+    #[test]
+    fn move_right_rotated() {
+        let mut app = setup(1.0, 10.0);
+        mouse_rotated(&mut app, Quat::from_rotation_y(90.0f32.to_radians()));
+        press(&mut app, KeyCode::D, 1.0);
+        let pos = get_camera(&mut app);
+        assert_eq!(pos.translation.x, 0.0);
+        assert_eq!(pos.translation.y, 0.0);
+        assert_eq!(pos.translation.z, -1.0);
+    }
+
     fn press(app: &mut App, k: KeyCode, time_ms: f32) {
         let input = &mut app.world.resource_mut::<Input<KeyCode>>();
         input.press(k);
@@ -289,6 +317,16 @@ mod test {
             .resource_mut::<Time>()
             .advance_by(Duration::from_secs_f32(time_ms));
         app.update();
+    }
+
+    fn mouse_rotated(app: &mut App, rot: Quat) {
+        let mut t = app
+            .world
+            .query_filtered::<&mut Transform, With<NoClip>>()
+            .iter_mut(&mut app.world)
+            .next()
+            .unwrap();
+        t.rotation = rot;
     }
 
     fn setup(speed: f32, mouse_speed: f32) -> App {
