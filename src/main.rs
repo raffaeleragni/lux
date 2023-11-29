@@ -12,6 +12,17 @@ use std::time::Duration;
 fn main() {
     let mut app = App::new();
     let args = Args::parse();
+    app.insert_resource(args.clone());
+
+    main_init(&args, &mut app);
+    components::init(&mut app);
+    networking::init(&args, &mut app);
+    world::init(&mut app);
+
+    app.run();
+}
+
+fn main_init(args: &Args, app: &mut App) {
     let headless = match args.command {
         Some(Command::Host {
             world_file: _,
@@ -19,9 +30,6 @@ fn main() {
         }) => headless,
         _ => false,
     };
-
-    app.insert_resource(args.clone());
-
     if headless {
         app.add_plugins(AssetPlugin::default());
         app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
@@ -29,16 +37,10 @@ fn main() {
         )));
     } else {
         if args.xr_enabled {
-            xr::init(&mut app);
+            xr::init(app);
         } else {
             app.add_plugins(DefaultPlugins);
         }
-        desktop::init(&mut app);
+        desktop::init(app);
     }
-
-    networking::init(&args, &mut app);
-    components::register(&mut app);
-    world::init(&mut app);
-
-    app.run();
 }

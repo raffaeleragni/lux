@@ -1,1 +1,1 @@
-pub fn register(_: &mut bevy::prelude::App) {}
+pub fn init(_: &mut bevy::prelude::App) {}
