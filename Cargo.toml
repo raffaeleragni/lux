@@ -19,8 +19,11 @@ desktop_camera = { path = "desktop_camera" }
 opt-level = 1
 
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
-#[profile.dev.package."*"]
-#opt-level = 3
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release.package."bevy-inspector-egui"]
+opt-level = 1
 
 [workspace]
 members = ["components", "desktop_camera"]

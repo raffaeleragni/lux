@@ -80,6 +80,7 @@ fn load_world_from_args(
                 LoadedSceneItem,
             ));
         }
+        Some(Command::Join { ip: _ }) => (),
         _ => spawn_empty_world(meshes, materials, commands),
     }
 }
