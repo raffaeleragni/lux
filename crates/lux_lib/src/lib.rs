@@ -1,5 +1,3 @@
-mod world;
-
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
 use lux_cli::{Args, Command};
 use std::time::Duration;
@@ -13,7 +11,7 @@ pub fn app() -> App {
     base_init(&args, &mut app);
     lux_components::init(&mut app);
     lux_networking::init(&args, &mut app);
-    world::init(&mut app);
+    lux_world::init(&mut app);
 
     app
 }

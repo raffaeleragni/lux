@@ -1,3 +1,3 @@
 fn main() {
-    lux::app().run();
+    lux_lib::app().run();
 }

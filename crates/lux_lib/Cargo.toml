@@ -1,0 +1,20 @@
+[package]
+name = "lux_lib"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.3.0", features = ["derive"] }
+serde = { version = "1.0.160", features = ["derive"] }
+bevy = { version = "0.12", default-features = false }
+bevy_sync = "0.12.1"
+lux_cli = { path = "../lux_cli" }
+lux_world = { path = "../lux_world" }
+lux_networking = { path = "../lux_networking" }
+lux_components = { path = "../lux_components" }
+lux_desktop = { path = "../lux_desktop" }
+lux_desktop_camera = { path = "../lux_desktop_camera" }
+lux_xr = { path = "../lux_xr" }
+
