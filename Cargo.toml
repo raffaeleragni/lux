@@ -8,3 +8,7 @@ lux_lib = { path = "crates/lux_lib" }
 
 [workspace]
 members = ["crates/*"]
+
+[features]
+default = []
+xr = ["lux_lib/xr"]

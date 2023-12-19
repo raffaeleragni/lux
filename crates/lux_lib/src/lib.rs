@@ -30,9 +30,13 @@ fn base_init(args: &Args, app: &mut App) {
             Duration::from_secs_f64(1.0 / 60.0),
         )));
     } else {
+        let mut plugins_added = false;
+        #[cfg(feature = "xr")]
         if args.xr_enabled {
             lux_xr::init(app);
-        } else {
+            plugins_added = true;
+        }
+        if !plugins_added {
             app.add_plugins(DefaultPlugins);
         }
         lux_desktop::init(app);

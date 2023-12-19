@@ -16,5 +16,8 @@ lux_networking = { path = "../lux_networking" }
 lux_components = { path = "../lux_components" }
 lux_desktop = { path = "../lux_desktop" }
 lux_desktop_camera = { path = "../lux_desktop_camera" }
-lux_xr = { path = "../lux_xr" }
+lux_xr = { path = "../lux_xr", optional = true }
 
+[features]
+default = []
+xr = ["dep:lux_xr", "lux_cli/xr"]
