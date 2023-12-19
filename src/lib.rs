@@ -15,7 +15,7 @@ pub fn app() -> App {
     app.insert_resource(args.clone());
 
     base_init(&args, &mut app);
-    components::init(&mut app);
+    lux_components::init(&mut app);
     networking::init(&args, &mut app);
     world::init(&mut app);
 

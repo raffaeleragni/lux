@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use desktop_camera::NoClip;
+use lux_desktop_camera::NoClip;
 
 mod layouts;
 mod menu;
@@ -14,6 +14,6 @@ pub fn init(app: &mut App) {
     ));
     app.add_plugins(menu::MenuPlugin);
     app.add_plugins(bevy_editor_pls::EditorPlugin::default());
-    app.add_plugins(desktop_camera::DesktopCameraPlugin);
+    app.add_plugins(lux_desktop_camera::DesktopCameraPlugin);
     layouts::init(app);
 }

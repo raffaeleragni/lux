@@ -1,5 +1,5 @@
 [package]
-name = "desktop_camera"
+name = "lux_desktop_camera"
 version = "0.1.0"
 edition = "2021"
 
