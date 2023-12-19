@@ -1,7 +1,7 @@
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
+use clap::Parser;
 use lux_cli::{Args, Command};
 use std::time::Duration;
-use clap::Parser;
 
 pub fn app() -> App {
     let mut app = App::new();

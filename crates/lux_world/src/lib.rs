@@ -1,6 +1,6 @@
-use lux_cli::{Args, Command};
 use bevy::{prelude::*, utils::Uuid};
 use bevy_sync::{SyncDown, SyncMark};
+use lux_cli::{Args, Command};
 
 pub fn init(app: &mut App) {
     app.add_systems(
