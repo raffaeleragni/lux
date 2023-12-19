@@ -4,7 +4,7 @@ use bevy_egui::{egui, EguiContexts};
 pub fn init(app: &mut App) {
     app.add_systems(
         Update,
-        render_main_menu.run_if(in_state(crate::desktop::menu::MenuState::Main)),
+        render_main_menu.run_if(in_state(crate::menu::MenuState::Main)),
     );
 }
 

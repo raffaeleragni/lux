@@ -1,4 +1,3 @@
-mod desktop;
 mod networking;
 mod world;
 mod xr;
@@ -40,6 +39,6 @@ fn base_init(args: &Args, app: &mut App) {
         } else {
             app.add_plugins(DefaultPlugins);
         }
-        desktop::init(app);
+        lux_desktop::init(app);
     }
 }
