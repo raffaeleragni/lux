@@ -1,4 +1,3 @@
-mod networking;
 mod world;
 mod xr;
 
@@ -14,7 +13,7 @@ pub fn app() -> App {
 
     base_init(&args, &mut app);
     lux_components::init(&mut app);
-    networking::init(&args, &mut app);
+    lux_networking::init(&args, &mut app);
     world::init(&mut app);
 
     app
