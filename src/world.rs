@@ -1,4 +1,4 @@
-use crate::cli::{Args, Command};
+use lux_cli::{Args, Command};
 use bevy::{prelude::*, utils::Uuid};
 use bevy_sync::{SyncDown, SyncMark};
 

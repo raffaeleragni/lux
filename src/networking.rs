@@ -3,7 +3,7 @@ use std::net::{IpAddr, Ipv4Addr};
 use bevy::{pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb};
 use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
 
-use crate::cli::{Args, Command};
+use lux_cli::{Args, Command};
 
 static SYNC_PORT: u16 = 4001;
 
