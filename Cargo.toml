@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.12" }
 bevy_sync = "0.12.1"
-bevy_oxr = "0.1.0"
 clap = { version = "4.3.0", features = ["derive"] }
 serde = { version = "1.0.160", features = ["derive"] }
 lux_cli = { path = "crates/lux_cli" }
@@ -14,6 +13,7 @@ lux_networking = { path = "crates/lux_networking" }
 lux_components = { path = "crates/lux_components" }
 lux_desktop = { path = "crates/lux_desktop" }
 lux_desktop_camera = { path = "crates/lux_desktop_camera" }
+lux_xr = { path = "crates/lux_xr" }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

@@ -1,5 +1,4 @@
 mod world;
-mod xr;
 
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
 use lux_cli::{Args, Command};
@@ -34,7 +33,7 @@ fn base_init(args: &Args, app: &mut App) {
         )));
     } else {
         if args.xr_enabled {
-            xr::init(app);
+            lux_xr::init(app);
         } else {
             app.add_plugins(DefaultPlugins);
         }
