@@ -24,7 +24,7 @@ jobs:
         run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev libudev-dev libopenxr-loader1 libopenxr-dev
       - name: "Checks"
         run: |
-          cargo fmt -F xr --check
+          cargo fmt --check
           cargo clippy -F xr --no-deps --tests -- -D warnings
       - name: "Test"
         run: |
@@ -69,7 +69,7 @@ jobs:
       - name: "Checks"
         shell: cmd
         run: |
-          cargo fmt -F xr --check || exit /b 1
+          cargo fmt --check || exit /b 1
           cargo clippy -F xr --no-deps --tests -- -D warnings || exit /b 1
       - name: "Test"
         shell: cmd
