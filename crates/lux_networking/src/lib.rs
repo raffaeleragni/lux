@@ -6,6 +6,7 @@ use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
 use lux_cli::{Args, Command};
 
 static SYNC_PORT: u16 = 4001;
+static WEB_PORT: u16 = 4002;
 
 pub fn init(args: &Args, app: &mut App) {
     setup_sync(args, app);
@@ -35,10 +36,12 @@ fn setup_sync(args: &Args, app: &mut App) {
         }) => app.add_plugins(ServerPlugin {
             ip: localhost,
             port: SYNC_PORT,
+            web_port: WEB_PORT,
         }),
         Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
             ip: ip.clone().to_owned(),
             port: SYNC_PORT,
+            web_port: WEB_PORT,
         }),
         _ => app,
     };

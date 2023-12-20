@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.12", default-features = false }
-bevy_sync = "0.12.1"
+bevy_sync = "0.12.2"
 lux_cli = { path = "../lux_cli" }
 
