@@ -25,7 +25,7 @@ fn load_world_from_args(
         Some(Command::Host {
             world_file,
             headless: _,
-        }) => importer::import_file(world_file, &mut commands, &assets),
+        }) => importer::import(world_file, &mut commands, &assets),
         Some(Command::Join { ip: _ }) => (),
         _ => spawn_empty_world(meshes, materials, commands),
     }
