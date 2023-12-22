@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::{prelude::*, time::common_conditions::on_timer, app::AppExit};
+use bevy::{app::AppExit, prelude::*, time::common_conditions::on_timer, utils::Uuid};
 use lux_cli::{Args, Command};
 use lux_world::init;
 
@@ -25,20 +25,42 @@ fn main() {
 fn check_handles(
     mesh_query: Query<&Handle<Mesh>>,
     material_query: Query<&Handle<StandardMaterial>>,
-    mut quit_events: EventWriter<AppExit>
+    mut quit_events: EventWriter<AppExit>,
 ) {
+    let mut mesh_uuid: Option<Uuid> = None;
+    let mut material_uuid: Option<Uuid> = None;
     for handle in mesh_query.iter() {
-        if let Handle::Strong(_) = handle {
-            println!("MESH IS STRONG HANDLE");
-            return;
+        match handle {
+            Handle::Strong(_) => {
+                println!("MESH IS STRONG HANDLE");
+                return;
+            }
+            Handle::Weak(id) => {
+                let AssetId::Uuid { uuid: id }: &AssetId<Mesh> = id else {
+                    break;
+                };
+                mesh_uuid = Some(*id);
+            }
         }
     }
     for handle in material_query.iter() {
-        if let Handle::Strong(_) = handle {
-            println!("MATERIAL IS STRONG HANDLE");
-            return;
+        match handle {
+            Handle::Strong(_) => {
+                println!("MATERIAL IS STRONG HANDLE");
+                return;
+            }
+            Handle::Weak(id) => {
+                let AssetId::Uuid { uuid: id }: &AssetId<StandardMaterial> = id else {
+                    break;
+                };
+                material_uuid = Some(*id);
+            }
         }
     }
-    println!("OK");
-    quit_events.send(AppExit);    
+    if mesh_uuid.is_some() && material_uuid.is_some() {
+        println!("OK: {:?}:{:?}", mesh_uuid, material_uuid);
+        quit_events.send(AppExit);
+    } else {
+        println!("HANDLES MISSING");
+    }
 }
