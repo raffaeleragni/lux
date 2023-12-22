@@ -96,9 +96,11 @@ fn handle_mesh(
         let asset = meshes.get(h.id()).unwrap();
         let asset = (*asset).clone();
         meshes.insert(id, asset);
+        debug!("Reassigned mesh to uuid {:?}", id);
         commands
             .get_entity(e)
             .unwrap()
+            .remove::<LoadedSceneItemHandleMesh>()
             .remove::<Handle<Mesh>>()
             .insert(Handle::Weak(id));
     }
@@ -114,9 +116,11 @@ fn handle_material(
         let asset = materials.get(h.id()).unwrap();
         let asset = (*asset).clone();
         materials.insert(id, asset);
+        debug!("Reassigned material to uuid {:?}", id);
         commands
             .get_entity(e)
             .unwrap()
+            .remove::<LoadedSceneItemHandleMaterial>()
             .remove::<Handle<Mesh>>()
             .insert(Handle::Weak(id));
     }
