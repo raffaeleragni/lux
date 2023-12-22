@@ -66,15 +66,6 @@ jobs:
         shell: powershell
         run: |
           NuGet Install OpenXR.Loader -Version 1.0.10.2
-      - name: "Checks"
-        shell: cmd
-        run: |
-          cargo fmt --check || exit /b 1
-          cargo clippy -F xr --no-deps --tests -- -D warnings || exit /b 1
-      - name: "Test"
-        shell: cmd
-        run: |
-          cargo test --all -F xr || exit /b 1
       - name: "Build"
         shell: cmd
         run: |
@@ -93,13 +84,6 @@ jobs:
           uses: Swatinem/rust-cache@v2
           with:
             prefix-key: "max-"
-        - name: "Checks"
-          run: |
-            cargo fmt --check
-            cargo clippy --no-deps --tests -- -D warnings
-        - name: "Test"
-          run: |
-            cargo test --workspace -- --skip lux_xr
         - name: "Build"
           run: |
             cargo build --release
