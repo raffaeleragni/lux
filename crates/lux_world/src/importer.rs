@@ -92,7 +92,9 @@ fn handle_mesh(
     query: Query<(Entity, &Handle<Mesh>), With<LoadedSceneItemHandleMesh>>,
 ) {
     for (e, h) in query.iter() {
-        let id = AssetId::Uuid { uuid: Uuid::new_v4() };
+        let id = AssetId::Uuid {
+            uuid: Uuid::new_v4(),
+        };
         let asset = meshes.get(h.id()).unwrap();
         let asset = (*asset).clone();
         meshes.insert(id, asset);
@@ -112,7 +114,9 @@ fn handle_material(
     query: Query<(Entity, &Handle<StandardMaterial>), With<LoadedSceneItemHandleMaterial>>,
 ) {
     for (e, h) in query.iter() {
-        let id = AssetId::Uuid { uuid: Uuid::new_v4() };
+        let id = AssetId::Uuid {
+            uuid: Uuid::new_v4(),
+        };
         let asset = materials.get(h.id()).unwrap();
         let asset = (*asset).clone();
         materials.insert(id, asset);
