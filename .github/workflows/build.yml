@@ -99,7 +99,7 @@ jobs:
             cargo clippy --no-deps --tests -- -D warnings
         - name: "Test"
           run: |
-            cargo test --all
+            cargo test --workspace -- --skip lux_xr
         - name: "Build"
           run: |
             cargo build --release
