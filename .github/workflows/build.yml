@@ -28,7 +28,7 @@ jobs:
           cargo clippy -F xr --no-deps --tests -- -D warnings
       - name: "Test"
         run: |
-          cargo test -F xr
+          cargo test --all -F xr
       - name: "Build"
         run: |
           cargo build -F xr --release
@@ -74,7 +74,7 @@ jobs:
       - name: "Test"
         shell: cmd
         run: |
-          cargo test -F xr || exit /b 1
+          cargo test --all -F xr || exit /b 1
       - name: "Build"
         shell: cmd
         run: |
@@ -99,7 +99,7 @@ jobs:
             cargo clippy --no-deps --tests -- -D warnings
         - name: "Test"
           run: |
-            cargo test
+            cargo test --all
         - name: "Build"
           run: |
             cargo build --release
