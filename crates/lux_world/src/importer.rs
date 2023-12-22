@@ -10,7 +10,7 @@ pub(crate) fn init(app: &mut App) {
 
 pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let scene = assets.load(file_name.to_owned() + "#Scene0");
-    println!("{:?}", scene);
+    debug!("Loading SceneBundle: {:?}", scene);
     commands.spawn((
         SceneBundle {
             scene,
