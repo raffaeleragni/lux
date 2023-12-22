@@ -10,3 +10,5 @@ bevy = { version = "0.12", default-features = false }
 bevy_sync = "0.12.2"
 lux_cli = { path = "../lux_cli" }
 
+[dev-dependencies]
+bevy_editor_pls = "0.6"

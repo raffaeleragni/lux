@@ -1,22 +1,25 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::Uuid};
 use bevy_sync::{SyncDown, SyncMark};
 
 pub(crate) fn init(app: &mut App) {
-    app.add_systems(Update, (propagate, cleanup, handle_mesh, handle_material));
+    app.add_systems(Update, (propagate, handle_mesh, handle_material));
+    app.add_systems(Update, cleanup);
+    app.add_systems(Update, cleanup_mesh);
+    app.add_systems(Update, cleanup_material);
 }
 
 pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let scene = assets.load(file_name.to_owned() + "#Scene0");
-    commands
-        .spawn((SceneBundle {
+    println!("{:?}", scene);
+    commands.spawn((
+        SceneBundle {
             scene,
             ..Default::default()
-        },))
-        .insert((
-            LoadedSceneItem,
-            LoadedSceneItemHandleMesh,
-            LoadedSceneItemHandleMaterial,
-        ));
+        },
+        LoadedSceneItem,
+        LoadedSceneItemHandleMesh,
+        LoadedSceneItemHandleMaterial,
+    ));
 }
 
 #[derive(Component)]
@@ -53,36 +56,68 @@ fn cleanup(query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>, mut co
     }
 }
 
-fn handle_mesh() {}
-
-fn handle_material() {}
-
-#[cfg(test)]
-mod test {
-    use bevy::pbr::PbrPlugin;
-
-    use super::*;
-
-    fn load_test_world(mut commands: Commands, assets: Res<AssetServer>) {
-        import("assets/cube.glb#Scene0", &mut commands, &assets);
+fn cleanup_mesh(
+    query_handle_mesh: Query<Entity, (With<LoadedSceneItemHandleMesh>, Without<Handle<Mesh>>)>,
+    mut commands: Commands,
+) {
+    for e in query_handle_mesh.iter() {
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<LoadedSceneItemHandleMesh>();
     }
+}
 
-    #[test]
-    fn test() {
-        let mut app = setup_app();
-        init(&mut app);
-        app.add_systems(Startup, load_test_world);
-        app.update();
+fn cleanup_material(
+    query_handle_material: Query<
+        Entity,
+        (
+            With<LoadedSceneItemHandleMaterial>,
+            Without<Handle<StandardMaterial>>,
+        ),
+    >,
+    mut commands: Commands,
+) {
+    for e in query_handle_material.iter() {
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<LoadedSceneItemHandleMaterial>();
     }
+}
 
-    fn setup_app() -> App {
-        let mut app = App::new();
-        app.add_plugins(MinimalPlugins);
-        app.add_plugins(AssetPlugin::default());
-        app.init_asset::<Scene>();
-        app.init_asset::<Shader>();
-        app.init_asset::<Mesh>();
-        app.add_plugins(PbrPlugin::default());
-        app
+fn handle_mesh(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    query: Query<(Entity, &Handle<Mesh>), With<LoadedSceneItemHandleMesh>>,
+) {
+    for (e, h) in query.iter() {
+        let id = AssetId::Uuid { uuid: Uuid::new_v4() };
+        let asset = meshes.get(h.id()).unwrap();
+        let asset = (*asset).clone();
+        meshes.insert(id, asset);
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<Handle<Mesh>>()
+            .insert(Handle::Weak(id));
+    }
+}
+
+fn handle_material(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<(Entity, &Handle<StandardMaterial>), With<LoadedSceneItemHandleMaterial>>,
+) {
+    for (e, h) in query.iter() {
+        let id = AssetId::Uuid { uuid: Uuid::new_v4() };
+        let asset = materials.get(h.id()).unwrap();
+        let asset = (*asset).clone();
+        materials.insert(id, asset);
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<Handle<Mesh>>()
+            .insert(Handle::Weak(id));
     }
 }
