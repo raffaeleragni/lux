@@ -9,6 +9,7 @@ fn main() {
     app.add_plugins(DefaultPlugins);
     app.add_plugins(bevy_editor_pls::EditorPlugin::default());
     app.insert_resource(Args {
+        xr_enabled: false,
         command: Some(Command::Host {
             world_file: "cube.glb".to_string(),
             headless: false,

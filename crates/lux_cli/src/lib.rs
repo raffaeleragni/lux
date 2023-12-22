@@ -7,7 +7,6 @@ use clap::{Parser, Subcommand};
 #[command(author, version, about, long_about = None)]
 pub struct Args {
     /// Enable XR/VR
-    #[cfg(feature = "xr")]
     #[clap(name = "xr", long, default_value_t = false)]
     pub xr_enabled: bool,
     #[clap(subcommand)]
