@@ -10,7 +10,7 @@ cfg-if = "1.0.0"
 clap = { version = "4.3.0", features = ["derive"] }
 serde = { version = "1.0.160", features = ["derive"] }
 bevy = { version = "0.12", default-features = false }
-bevy_sync = "0.12.1"
+bevy_sync = "0.12.3"
 lux_cli = { path = "../lux_cli" }
 lux_world = { path = "../lux_world" }
 lux_networking = { path = "../lux_networking" }
