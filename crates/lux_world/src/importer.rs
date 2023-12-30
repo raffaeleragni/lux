@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::Uuid};
+use bevy::{prelude::*, scene::SceneInstance, utils::Uuid};
 use bevy_sync::{SyncDown, SyncMark};
 
 pub(crate) fn init(app: &mut App) {
@@ -37,6 +37,7 @@ fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut comma
             .get_entity(e)
             .unwrap()
             .remove::<LoadedSceneItem>()
+            .remove::<SceneInstance>()
             .insert(SyncMark);
         for c in childs {
             debug!("Propagating entity {:?} children", e);
@@ -59,7 +60,7 @@ fn cleanup(query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>, mut co
 }
 
 fn cleanup_mesh(
-    query_handle_mesh: Query<Entity, (With<LoadedSceneItemHandleMesh>, Without<Handle<Mesh>>)>,
+    query_handle_mesh: Query<Entity, (Added<LoadedSceneItemHandleMesh>, Without<Handle<Mesh>>)>,
     mut commands: Commands,
 ) {
     for e in query_handle_mesh.iter() {
@@ -75,7 +76,7 @@ fn cleanup_material(
     query_handle_material: Query<
         Entity,
         (
-            With<LoadedSceneItemHandleMaterial>,
+            Added<LoadedSceneItemHandleMaterial>,
             Without<Handle<StandardMaterial>>,
         ),
     >,
@@ -96,7 +97,7 @@ fn cleanup_material(
 fn handle_mesh(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    query: Query<(Entity, &Handle<Mesh>), With<LoadedSceneItemHandleMesh>>,
+    query: Query<(Entity, &Handle<Mesh>), Added<LoadedSceneItemHandleMesh>>,
 ) {
     for (e, h) in query.iter() {
         let id = AssetId::Uuid {
@@ -118,7 +119,7 @@ fn handle_mesh(
 fn handle_material(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    query: Query<(Entity, &Handle<StandardMaterial>), With<LoadedSceneItemHandleMaterial>>,
+    query: Query<(Entity, &Handle<StandardMaterial>), Added<LoadedSceneItemHandleMaterial>>,
 ) {
     for (e, h) in query.iter() {
         let id = AssetId::Uuid {
@@ -132,7 +133,7 @@ fn handle_material(
             .get_entity(e)
             .unwrap()
             .remove::<LoadedSceneItemHandleMaterial>()
-            .remove::<Handle<Mesh>>()
+            .remove::<Handle<StandardMaterial>>()
             .insert(Handle::Weak(id));
     }
 }
