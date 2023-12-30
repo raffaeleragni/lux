@@ -26,6 +26,8 @@ fn main() {
 fn check_handles(
     mesh_query: Query<&Handle<Mesh>>,
     material_query: Query<&Handle<StandardMaterial>>,
+    meshes: Res<Assets<Mesh>>,
+    materials: Res<Assets<StandardMaterial>>,
     mut quit_events: EventWriter<AppExit>,
 ) {
     let mut mesh_uuid: Option<Uuid> = None;
@@ -64,4 +66,6 @@ fn check_handles(
     } else {
         println!("HANDLES MISSING");
     }
+    println!("Mesh count: {}", meshes.len());
+    println!("Material count: {}", materials.len());
 }

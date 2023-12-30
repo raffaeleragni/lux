@@ -2,10 +2,9 @@ use bevy::{prelude::*, utils::Uuid};
 use bevy_sync::{SyncDown, SyncMark};
 
 pub(crate) fn init(app: &mut App) {
-    app.add_systems(Update, (propagate, handle_mesh, handle_material));
-    app.add_systems(Update, cleanup);
-    app.add_systems(Update, cleanup_mesh);
-    app.add_systems(Update, cleanup_material);
+    app.add_systems(Update, (propagate, cleanup).chain());
+    app.add_systems(Update, (handle_mesh, cleanup_mesh).chain());
+    app.add_systems(Update, (handle_material, cleanup_material).chain());
 }
 
 pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
@@ -33,12 +32,14 @@ struct LoadedSceneItemHandleMaterial;
 
 fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut commands: Commands) {
     for (e, childs) in query.iter() {
+        debug!("Propagating entity {:?}", e);
         commands
             .get_entity(e)
             .unwrap()
             .remove::<LoadedSceneItem>()
             .insert(SyncMark);
         for c in childs {
+            debug!("Propagating entity {:?} children", e);
             commands
                 .get_entity(*c)
                 .unwrap()
@@ -52,6 +53,7 @@ fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut comma
 
 fn cleanup(query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>, mut commands: Commands) {
     for e in query.iter() {
+        debug!("Cleanup of entity {:?}", e);
         commands.get_entity(e).unwrap().remove::<LoadedSceneItem>();
     }
 }
@@ -61,6 +63,7 @@ fn cleanup_mesh(
     mut commands: Commands,
 ) {
     for e in query_handle_mesh.iter() {
+        debug!("Cleaning up LoadedSceneItemHandleMesh from entity {:?}", e);
         commands
             .get_entity(e)
             .unwrap()
@@ -79,6 +82,10 @@ fn cleanup_material(
     mut commands: Commands,
 ) {
     for e in query_handle_material.iter() {
+        debug!(
+            "Cleaning up LoadedSceneItemHandleMaterial from entity {:?}",
+            e
+        );
         commands
             .get_entity(e)
             .unwrap()
