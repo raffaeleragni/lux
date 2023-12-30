@@ -41,7 +41,7 @@ fn setup_sync(args: &Args, app: &mut App) {
         Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
             ip: ip.clone().to_owned(),
             port: SYNC_PORT,
-            web_port: WEB_PORT,
+            web_port: WEB_PORT + 1,
         }),
         _ => app,
     };
