@@ -119,13 +119,15 @@ fn handle_mesh(
 fn handle_material(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
     query: Query<(Entity, &Handle<StandardMaterial>), Added<LoadedSceneItemHandleMaterial>>,
 ) {
     for (e, h) in query.iter() {
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let asset = materials.get(h.id()).unwrap();
+        let asset = materials.get_mut(h.id()).unwrap();
+        handle_images(images.as_mut(), asset);
         let asset = (*asset).clone();
         materials.insert(id, asset);
         debug!("Reassigned material to uuid {:?}", id);
@@ -136,4 +138,26 @@ fn handle_material(
             .remove::<Handle<StandardMaterial>>()
             .insert(Handle::Weak(id));
     }
+}
+
+fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
+    macro_rules! swap_image {
+        ($image:expr) => {
+            if let Some(h) = $image.clone() {
+                let image = images.get(h.id()).unwrap();
+                let image = (*image).clone();
+                let id = AssetId::Uuid {
+                    uuid: Uuid::new_v4(),
+                };
+                images.insert(id, image);
+                $image = Some(Handle::Weak(id));
+                debug!("Reassigned image to uuid {:?}", id);
+            }
+        };
+    }
+    swap_image!(material.base_color_texture);
+    swap_image!(material.emissive_texture);
+    swap_image!(material.normal_map_texture);
+    swap_image!(material.occlusion_texture);
+    swap_image!(material.metallic_roughness_texture);
 }

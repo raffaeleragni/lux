@@ -28,10 +28,12 @@ fn check_handles(
     material_query: Query<&Handle<StandardMaterial>>,
     meshes: Res<Assets<Mesh>>,
     materials: Res<Assets<StandardMaterial>>,
+    images: Res<Assets<Image>>,
     mut quit_events: EventWriter<AppExit>,
 ) {
     let mut mesh_uuid: Option<Uuid> = None;
     let mut material_uuid: Option<Uuid> = None;
+    let mut image_uuid: Option<Uuid> = None;
     for handle in mesh_query.iter() {
         match handle {
             Handle::Strong(_) => {
@@ -57,10 +59,25 @@ fn check_handles(
                     break;
                 };
                 material_uuid = Some(*id);
+                let material = materials.get(handle).unwrap();
+                if let Some(image_id) = material.base_color_texture.clone() {
+                    match image_id {
+                        Handle::Strong(_) => {
+                            println!("IMAGE IS STRONG HANDLE");
+                            return;
+                        }
+                        Handle::Weak(id) => {
+                            let AssetId::Uuid { uuid: id }: AssetId<Image> = id else {
+                                break;
+                            };
+                            image_uuid = Some(id);
+                        }
+                    }
+                }
             }
         }
     }
-    if mesh_uuid.is_some() && material_uuid.is_some() {
+    if mesh_uuid.is_some() && material_uuid.is_some() & image_uuid.is_some() {
         println!("OK: {:?}:{:?}", mesh_uuid, material_uuid);
         quit_events.send(AppExit);
     } else {
@@ -68,4 +85,5 @@ fn check_handles(
     }
     println!("Mesh count: {}", meshes.len());
     println!("Material count: {}", materials.len());
+    println!("Image count: {}", images.len());
 }
