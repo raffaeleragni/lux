@@ -37,13 +37,13 @@ fn setup_sync(args: &Args, app: &mut App) {
             ip: localhost,
             port: SYNC_PORT,
             web_port: WEB_PORT,
-            max_transfer: 100_000_000,
+            max_transfer: 1_000_000_000,
         }),
         Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
             ip: ip.clone().to_owned(),
             port: SYNC_PORT,
             web_port: WEB_PORT + 1,
-            max_transfer: 100_000_000,
+            max_transfer: 1_000_000_000,
         }),
         _ => app,
     };
