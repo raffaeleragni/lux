@@ -21,6 +21,7 @@ fn base_init(args: &Args, app: &mut App) {
         Some(Command::Host {
             world_file: _,
             headless,
+            ip: _,
         }) => headless,
         _ => false,
     };

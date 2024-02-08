@@ -13,6 +13,7 @@ fn main() {
         command: Some(Command::Host {
             world_file: "cube.glb".to_string(),
             headless: false,
+            ip: None,
         }),
     });
     init(&mut app);

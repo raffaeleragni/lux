@@ -20,6 +20,7 @@ pub enum Command {
         world_file: String,
         #[clap(long, default_value_t = false)]
         headless: bool,
+        ip: Option<IpAddr>,
     },
     #[clap(name = "join")]
     Join { ip: IpAddr },

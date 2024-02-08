@@ -1,4 +1,4 @@
-use std::net::{IpAddr, Ipv4Addr};
+use std::net::{IpAddr, Ipv6Addr};
 
 use bevy::{pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb};
 use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
@@ -28,13 +28,14 @@ fn setup_sync(args: &Args, app: &mut App) {
     app.sync_materials(true);
     app.sync_meshes(true);
 
-    let localhost = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0));
+    let localhost = IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
     match &args.command {
         Some(Command::Host {
             world_file: _,
             headless: _,
+            ip,
         }) => app.add_plugins(ServerPlugin {
-            ip: localhost,
+            ip: ip.unwrap_or(localhost),
             port: SYNC_PORT,
             web_port: WEB_PORT,
             max_transfer: 1_000_000_000,
