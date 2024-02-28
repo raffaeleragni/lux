@@ -8,7 +8,7 @@ use lux_cli::{Args, Command};
 pub fn init(app: &mut App) {
     app.add_systems(
         Startup,
-        load_world_from_args.run_if(resource_exists::<Args>()),
+        load_world_from_args.run_if(resource_exists::<Args>),
     );
 
     importer::init(app);

@@ -1,17 +1,17 @@
 use bevy::prelude::*;
 use bevy_oxr::{
     xr_input::{
-        hand::HandInputDebugRenderer,
         interactions::{XRDirectInteractor, XRInteractorState, XRRayInteractor},
         trackers::{
             AimPose, OpenXRController, OpenXRLeftController, OpenXRRightController, OpenXRTracker,
-        },
+        }, hands::common::HandInputDebugRenderer,
     },
     DefaultXrPlugins,
 };
 
 pub fn init(app: &mut App) {
-    app.add_plugins(DefaultXrPlugins);
+    info!("Initializing XR");
+    app.add_plugins(DefaultXrPlugins::default());
     app.add_plugins(HandInputDebugRenderer);
     app.add_systems(Startup, spawn_xr_entities);
 }

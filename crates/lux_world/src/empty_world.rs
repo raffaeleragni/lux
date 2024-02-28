@@ -21,7 +21,7 @@ pub fn spawn_empty_world(
 ) {
     commands.spawn((
         PbrBundle {
-            mesh: meshes.addu(shape::Plane::from_size(50.0).into()),
+            mesh: meshes.addu(Plane3d::default().mesh().size(50.0, 50.0).into()),
             material: materials.addu(Color::rgb(0.3, 0.5, 0.3).into()),
             ..default()
         },
@@ -30,7 +30,7 @@ pub fn spawn_empty_world(
     ));
     commands.spawn((
         PbrBundle {
-            mesh: meshes.addu(Mesh::from(shape::Cube { size: 1.0 })),
+            mesh: meshes.addu(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))),
             material: materials.addu(Color::rgb(0.8, 0.7, 0.6).into()),
             transform: Transform::from_xyz(0.0, 0.5, 1.0),
             ..default()

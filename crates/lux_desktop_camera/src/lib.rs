@@ -22,10 +22,10 @@ pub struct KeyMaps {
 impl Default for KeyMaps {
     fn default() -> Self {
         Self {
-            forward: KeyCode::W,
-            backward: KeyCode::S,
-            left: KeyCode::A,
-            right: KeyCode::D,
+            forward: KeyCode::KeyW,
+            backward: KeyCode::KeyS,
+            left: KeyCode::KeyA,
+            right: KeyCode::KeyD,
             up: KeyCode::Space,
             down: KeyCode::ControlLeft,
         }
@@ -69,7 +69,7 @@ fn left(rot: &Quat) -> Vec3 {
 
 fn noclip_movement(
     mut query: Query<(&mut Transform, &NoClip)>,
-    input: Res<Input<KeyCode>>,
+    input: Res<ButtonInput<KeyCode>>,
     maps: Res<KeyMaps>,
     time: Res<Time>,
 ) {
@@ -151,7 +151,7 @@ mod test {
     #[test]
     fn move_forward() {
         let mut app = setup(1.0, 10.0);
-        press(&mut app, KeyCode::W, 1.0);
+        press(&mut app, KeyCode::KeyW, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -161,7 +161,7 @@ mod test {
     #[test]
     fn move_backward() {
         let mut app = setup(1.0, 10.0);
-        press(&mut app, KeyCode::S, 1.0);
+        press(&mut app, KeyCode::KeyS, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -171,7 +171,7 @@ mod test {
     #[test]
     fn move_left() {
         let mut app = setup(1.0, 10.0);
-        press(&mut app, KeyCode::A, 1.0);
+        press(&mut app, KeyCode::KeyA, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, -1.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -181,7 +181,7 @@ mod test {
     #[test]
     fn move_right() {
         let mut app = setup(1.0, 10.0);
-        press(&mut app, KeyCode::D, 1.0);
+        press(&mut app, KeyCode::KeyD, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 1.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -211,7 +211,7 @@ mod test {
     #[test]
     fn consider_speed() {
         let mut app = setup(2.0, 10.0);
-        press(&mut app, KeyCode::W, 1.0);
+        press(&mut app, KeyCode::KeyW, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -221,7 +221,7 @@ mod test {
     #[test]
     fn consider_time() {
         let mut app = setup(1.0, 10.0);
-        press(&mut app, KeyCode::W, 1.5);
+        press(&mut app, KeyCode::KeyW, 1.5);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -286,7 +286,7 @@ mod test {
     fn move_left_rotated() {
         let mut app = setup(1.0, 10.0);
         mouse_rotated(&mut app, Quat::from_rotation_y(90.0f32.to_radians()));
-        press(&mut app, KeyCode::A, 1.0);
+        press(&mut app, KeyCode::KeyA, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -297,7 +297,7 @@ mod test {
     fn move_right_rotated() {
         let mut app = setup(1.0, 10.0);
         mouse_rotated(&mut app, Quat::from_rotation_y(90.0f32.to_radians()));
-        press(&mut app, KeyCode::D, 1.0);
+        press(&mut app, KeyCode::KeyD, 1.0);
         let pos = get_camera(&mut app);
         assert_eq!(pos.translation.x, 0.0);
         assert_eq!(pos.translation.y, 0.0);
@@ -305,13 +305,13 @@ mod test {
     }
 
     fn press(app: &mut App, k: KeyCode, time_ms: f32) {
-        let input = &mut app.world.resource_mut::<Input<KeyCode>>();
+        let input = &mut app.world.resource_mut::<ButtonInput<KeyCode>>();
         input.press(k);
         app.world
             .resource_mut::<Time>()
             .advance_by(Duration::from_secs_f32(time_ms));
         app.update();
-        let input = &mut app.world.resource_mut::<Input<KeyCode>>();
+        let input = &mut app.world.resource_mut::<ButtonInput<KeyCode>>();
         input.release(k);
         app.update();
     }

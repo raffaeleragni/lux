@@ -11,4 +11,4 @@ bevy_sync.workspace = true
 lux_cli = { path = "../lux_cli" }
 
 [dev-dependencies]
-bevy_editor_pls = "0.6"
+bevy_editor_pls.workspace = true
