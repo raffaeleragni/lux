@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 lux_lib = { path = "crates/lux_lib" }
-wgpu = "0.19.3"
-wgpu-core = { version = "0.19.3", features = ["vulkan"] }
+wgpu = "0.20"
+wgpu-core = { version = "0.21", features = ["vulkan"] }
 
-[workspace]
+[corkspace]
 members = ["crates/*"]
 
 [workspace.dependencies]
@@ -18,7 +18,7 @@ bevy_sync = "0.13"
 #bevy_oxr = "0.1.0"
 bevy_oxr = { git = "http://github.com/awtterpip/bevy_oxr.git" }
 bevy_editor_pls = "0.8"
-bevy_egui = "0.26"
+bevy_egui = "0.27"
 
 [features]
 default = []

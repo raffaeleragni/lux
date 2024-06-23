@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_oxr::{
     xr_input::{
+        hands::common::HandInputDebugRenderer,
         interactions::{XRDirectInteractor, XRInteractorState, XRRayInteractor},
         trackers::{
             AimPose, OpenXRController, OpenXRLeftController, OpenXRRightController, OpenXRTracker,
-        }, hands::common::HandInputDebugRenderer,
+        },
     },
     DefaultXrPlugins,
 };

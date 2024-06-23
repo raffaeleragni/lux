@@ -1,5 +1,5 @@
 use bevy::{prelude::*, scene::SceneInstance, utils::Uuid};
-use bevy_sync::{SyncDown, SyncMark};
+use bevy_sync::{SyncEntity, SyncMark};
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
@@ -52,7 +52,10 @@ fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut comma
     }
 }
 
-fn cleanup(query: Query<Entity, (With<LoadedSceneItem>, With<SyncDown>)>, mut commands: Commands) {
+fn cleanup(
+    query: Query<Entity, (With<LoadedSceneItem>, With<SyncEntity>)>,
+    mut commands: Commands,
+) {
     for e in query.iter() {
         debug!("Cleanup of entity {:?}", e);
         commands.get_entity(e).unwrap().remove::<LoadedSceneItem>();
