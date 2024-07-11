@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 bevy.workspace = true
-bevy_oxr.workspace = true
+bevy_mod_xr.workspace = true
 

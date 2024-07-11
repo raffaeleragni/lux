@@ -1,6 +1,7 @@
 use std::time::Duration;
 
-use bevy::{app::AppExit, prelude::*, time::common_conditions::on_timer, utils::Uuid};
+use bevy::{app::AppExit, prelude::*, time::common_conditions::on_timer};
+use bevy_sync::Uuid;
 use lux_cli::{Args, Command};
 use lux_world::init;
 
@@ -80,7 +81,7 @@ fn check_handles(
     }
     if mesh_uuid.is_some() && material_uuid.is_some() & image_uuid.is_some() {
         println!("OK: {:?}:{:?}", mesh_uuid, material_uuid);
-        quit_events.send(AppExit);
+        quit_events.send(AppExit::Success);
     } else {
         println!("HANDLES MISSING");
     }

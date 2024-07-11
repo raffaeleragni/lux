@@ -1,5 +1,5 @@
-use bevy::{prelude::*, scene::SceneInstance, utils::Uuid};
-use bevy_sync::{SyncEntity, SyncMark};
+use bevy::{prelude::*, scene::SceneInstance};
+use bevy_sync::{SyncEntity, SyncMark, Uuid};
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());

@@ -12,13 +12,16 @@ wgpu-core = { version = "0.21", features = ["vulkan"] }
 members = ["crates/*"]
 
 [workspace.dependencies]
-bevy = { version = "0.13", default-features = false }
+bevy = { version = "0.14", default-features = false }
 #bevy_sync = { path = "../bevy_sync" }
-bevy_sync = "0.13"
+#bevy_sync = "0.13"
 #bevy_oxr = "0.1.0"
-bevy_oxr = { git = "http://github.com/awtterpip/bevy_oxr.git" }
-bevy_editor_pls = "0.8"
-bevy_egui = "0.27"
+#bevy_editor_pls = "0.8"
+bevy_sync = { git = "https://github.com/raffaeleragni/bevy_sync.git", branch = "bevy_0_14" }
+bevy_mod_xr = { git = "https://github.com/awtterpip/bevy_oxr.git" }
+bevy_editor_pls = { git = "https://github.com/zhaop/bevy_editor_pls", branch = "bevy-0.14" }
+bevy_egui = "0.28"
+
 
 [features]
 default = []

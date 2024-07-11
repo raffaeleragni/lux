@@ -305,20 +305,20 @@ mod test {
     }
 
     fn press(app: &mut App, k: KeyCode, time_ms: f32) {
-        let input = &mut app.world.resource_mut::<ButtonInput<KeyCode>>();
+        let input = &mut app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
         input.press(k);
-        app.world
+        app.world_mut()
             .resource_mut::<Time>()
             .advance_by(Duration::from_secs_f32(time_ms));
         app.update();
-        let input = &mut app.world.resource_mut::<ButtonInput<KeyCode>>();
+        let input = &mut app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
         input.release(k);
         app.update();
     }
 
     fn mouse_move(app: &mut App, delta: Vec2, time_ms: f32) {
-        app.world.send_event(MouseMotion { delta });
-        app.world
+        app.world_mut().send_event(MouseMotion { delta });
+        app.world_mut()
             .resource_mut::<Time>()
             .advance_by(Duration::from_secs_f32(time_ms));
         app.update();
@@ -326,9 +326,9 @@ mod test {
 
     fn mouse_rotated(app: &mut App, rot: Quat) {
         let mut t = app
-            .world
+            .world_mut()
             .query_filtered::<&mut Transform, With<NoClip>>()
-            .iter_mut(&mut app.world)
+            .iter_mut(app.world_mut())
             .next()
             .unwrap();
         t.rotation = rot;
@@ -339,7 +339,7 @@ mod test {
         app.add_plugins(MinimalPlugins.build().disable::<TimePlugin>());
         app.add_plugins(InputPlugin);
         app.add_plugins(DesktopCameraPlugin);
-        app.world.spawn((
+        app.world_mut().spawn((
             SpatialBundle::default(),
             NoClip {
                 speed,
@@ -355,9 +355,9 @@ mod test {
 
     fn get_camera(app: &mut App) -> &Transform {
         return app
-            .world
+            .world_mut()
             .query_filtered::<&Transform, With<NoClip>>()
-            .iter(&app.world)
+            .iter(app.world())
             .next()
             .unwrap();
     }

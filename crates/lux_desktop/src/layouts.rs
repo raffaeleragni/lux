@@ -11,7 +11,7 @@ pub fn init(app: &mut App) {
 fn render_main_menu(mut contexts: EguiContexts, mut exit: EventWriter<AppExit>) {
     egui::Window::new("Menu").show(contexts.ctx_mut(), |ui| {
         if ui.button("Quit").clicked() {
-            exit.send(AppExit);
+            exit.send(AppExit::Success);
         }
     });
 }
