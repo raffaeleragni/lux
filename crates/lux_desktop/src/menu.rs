@@ -36,7 +36,7 @@ fn esc_to_exit_menu(input: Res<ButtonInput<KeyCode>>, mut state: ResMut<NextStat
 
 #[cfg(test)]
 mod test {
-    use bevy::input::InputPlugin;
+    use bevy::{input::InputPlugin, state::app::StatesPlugin};
 
     use super::*;
 
@@ -64,18 +64,19 @@ mod test {
     fn setup() -> App {
         let mut app = App::new();
         app.add_plugins(InputPlugin);
+        app.add_plugins(StatesPlugin);
         app.add_plugins(MenuPlugin);
         app.update();
         app
     }
 
     fn state_is(app: &App, expected: MenuState) {
-        let state = app.world.resource::<State<MenuState>>();
+        let state = app.world().resource::<State<MenuState>>();
         assert_eq!(state.get(), &expected);
     }
 
     fn press_esc(app: &mut App) {
-        let input = &mut app.world.resource_mut::<ButtonInput<KeyCode>>();
+        let mut input = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
         input.press(KeyCode::Escape);
         input.release(KeyCode::Escape);
         app.update();

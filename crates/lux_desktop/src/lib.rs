@@ -5,7 +5,7 @@ mod layouts;
 mod menu;
 
 pub fn init(app: &mut App) {
-    app.world.spawn((
+    app.world_mut().spawn((
         NoClip::default(),
         Camera3dBundle {
             transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
