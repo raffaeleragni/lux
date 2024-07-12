@@ -100,13 +100,21 @@ fn cleanup_material(
 fn handle_mesh(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
     query: Query<(Entity, &Handle<Mesh>), Added<LoadedSceneItemHandleMesh>>,
 ) {
     for (e, h) in query.iter() {
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let asset = meshes.get(h.id()).unwrap();
+        let asset = meshes.get_mut(h.id()).unwrap();
+        if let Some(morphs) = extract_morph_targets(asset) {
+            if morphs.is_strong() {
+                let morphs = morphs.clone();
+                let morphs = swap_single_image(&mut images, morphs);
+                asset.set_morph_targets(morphs);
+            }
+        }
         let asset = (*asset).clone();
         meshes.insert(id, asset);
         debug!("Reassigned mesh to uuid {:?}", id);
@@ -117,6 +125,16 @@ fn handle_mesh(
             .remove::<Handle<Mesh>>()
             .insert(Handle::Weak(id));
     }
+}
+
+fn extract_morph_targets(mesh: &Mesh) -> &Option<Handle<Image>> {
+    let refmesh = mesh as &dyn Struct;
+    let morph_targets = refmesh
+        .field("morph_targets")
+        .unwrap()
+        .downcast_ref::<Option<Handle<Image>>>()
+        .unwrap();
+    morph_targets
 }
 
 fn handle_material(
@@ -147,14 +165,7 @@ fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
     macro_rules! swap_image {
         ($image:expr) => {
             if let Some(h) = $image.clone() {
-                let image = images.get(h.id()).unwrap();
-                let image = (*image).clone();
-                let id = AssetId::Uuid {
-                    uuid: Uuid::new_v4(),
-                };
-                images.insert(id, image);
-                $image = Some(Handle::Weak(id));
-                debug!("Reassigned image to uuid {:?}", id);
+                $image = Some(swap_single_image(images, h));
             }
         };
     }
@@ -163,4 +174,15 @@ fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
     swap_image!(material.normal_map_texture);
     swap_image!(material.occlusion_texture);
     swap_image!(material.metallic_roughness_texture);
+}
+
+fn swap_single_image(images: &mut Assets<Image>, image: Handle<Image>) -> Handle<Image> {
+    let image = images.get(image.id()).unwrap();
+    let image = (*image).clone();
+    let id = AssetId::Uuid {
+        uuid: Uuid::new_v4(),
+    };
+    images.insert(id, image);
+    debug!("Reassigned image to uuid {:?}", id);
+    Handle::Weak(id)
 }
