@@ -1,7 +1,21 @@
+use bevy::{
+    app::{App, Startup, Update},
+    ecs::{
+        query::With,
+        schedule::IntoSystemConfigs,
+        system::{Commands, Query, Res, ResMut},
+    },
+    hierarchy::BuildChildren,
+    math::vec3,
+    time::Time,
+    transform::components::Transform,
+};
 use bevy_mod_openxr::{helper_traits::ToQuat, resources::OxrViews};
 use bevy_mod_xr::session::XrTrackingRoot;
-use bevy_xr_utils::xr_utils_actions::{ActiveSet, XRUtilsAction, XRUtilsActionSet, XRUtilsActionState, XRUtilsActionSystemSet, XRUtilsBinding};
-use bevy::{app::{App, Startup, Update}, ecs::{query::With, schedule::IntoSystemConfigs, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, math::vec3, time::Time, transform::components::Transform};
+use bevy_xr_utils::xr_utils_actions::{
+    ActiveSet, XRUtilsAction, XRUtilsActionSet, XRUtilsActionState, XRUtilsActionSystemSet,
+    XRUtilsBinding,
+};
 
 pub fn init(app: &mut App) {
     app.add_systems(

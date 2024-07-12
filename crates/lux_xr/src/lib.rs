@@ -25,4 +25,3 @@ fn quit_xr_on_app_exit(
         writer_e.send(XrEndSessionEvent {});
     }
 }
-
