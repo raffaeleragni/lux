@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use bevy_mod_xr::session::XrSessionPlugin;
 
 pub fn init(app: &mut App) {
     info!("Initializing XR");
-    app.add_plugins(XrSessionPlugin { auto_handle: true });
+    app.add_plugins(bevy_mod_openxr::add_xr_plugins(DefaultPlugins))
+        .add_plugins(bevy_xr_utils::hand_gizmos::HandGizmosPlugin);
 }
