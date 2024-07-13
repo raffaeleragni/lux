@@ -30,6 +30,8 @@ fn setup_sync(args: &Args, app: &mut App) {
     app.sync_component::<Transform>();
     app.sync_component::<Wireframe>();
     app.sync_component::<PointLight>();
+    app.sync_component::<SpotLight>();
+    app.sync_component::<DirectionalLight>();
     app.sync_component::<MeshMorphWeights>();
     app.sync_component::<SkinnedMesh>();
     app.sync_component::<Handle<StandardMaterial>>();
