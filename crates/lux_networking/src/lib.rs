@@ -1,6 +1,13 @@
 use std::net::{IpAddr, Ipv6Addr};
 
-use bevy::{pbr::wireframe::Wireframe, prelude::*, render::primitives::Aabb};
+use bevy::{
+    pbr::wireframe::Wireframe,
+    prelude::*,
+    render::{
+        mesh::{morph::MeshMorphWeights, skinning::SkinnedMesh},
+        primitives::Aabb,
+    },
+};
 use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
 
 use lux_cli::{Args, Command};
@@ -23,6 +30,8 @@ fn setup_sync(args: &Args, app: &mut App) {
     app.sync_component::<Transform>();
     app.sync_component::<Wireframe>();
     app.sync_component::<PointLight>();
+    app.sync_component::<MeshMorphWeights>();
+    app.sync_component::<SkinnedMesh>();
     app.sync_component::<Handle<StandardMaterial>>();
     app.sync_component::<Handle<Mesh>>();
     app.sync_component::<Handle<Image>>();
