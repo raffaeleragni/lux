@@ -25,6 +25,7 @@ fn setup_sync(args: &Args, app: &mut App) {
     app.sync_component::<PointLight>();
     app.sync_component::<Handle<StandardMaterial>>();
     app.sync_component::<Handle<Mesh>>();
+    app.sync_component::<Handle<Image>>();
     app.sync_materials(true);
     app.sync_meshes(true);
 
