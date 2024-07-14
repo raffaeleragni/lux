@@ -5,9 +5,10 @@ pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
     app.add_systems(Update, (handle_mesh, cleanup_mesh).chain());
     app.add_systems(Update, (handle_material, cleanup_material).chain());
+    app.add_systems(Update, (handle_audio, cleanup_audio).chain());
 }
 
-pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
+pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let scene = assets.load(file_name.to_owned() + "#Scene0");
     debug!("Loading SceneBundle: {:?}", scene);
     commands.spawn((
@@ -21,6 +22,16 @@ pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetSer
     ));
 }
 
+pub fn import_audio(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
+    commands.spawn((
+        AudioBundle {
+            source: assets.load(file_name.to_owned()),
+            ..default()
+        },
+        LoadedAudioItem,
+    ));
+}
+
 #[derive(Component)]
 struct LoadedSceneItem;
 
@@ -29,6 +40,9 @@ struct LoadedSceneItemHandleMesh;
 
 #[derive(Component)]
 struct LoadedSceneItemHandleMaterial;
+
+#[derive(Component)]
+struct LoadedAudioItem;
 
 fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut commands: Commands) {
     for (e, childs) in query.iter() {
@@ -97,6 +111,16 @@ fn cleanup_material(
     }
 }
 
+fn cleanup_audio(
+    query_handle: Query<Entity, (Added<LoadedAudioItem>, Without<Handle<AudioSource>>)>,
+    mut commands: Commands,
+) {
+    for e in query_handle.iter() {
+        debug!("Cleaning up LoadedAudio from entity {:?}", e);
+        commands.get_entity(e).unwrap().remove::<LoadedAudioItem>();
+    }
+}
+
 fn handle_mesh(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -107,8 +131,8 @@ fn handle_mesh(
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let asset = meshes.get_mut(h.id()).unwrap();
-        if let Some(morphs) = extract_morph_targets(asset) {
+        let mut asset = meshes.remove(h.id()).unwrap();
+        if let Some(morphs) = extract_morph_targets(&asset) {
             if morphs.is_strong() {
                 let morphs = morphs.clone();
                 let morphs = swap_single_image(&mut images, morphs);
@@ -116,7 +140,6 @@ fn handle_mesh(
                 debug!("Reassigned morph targets on {:?}", id);
             }
         }
-        let asset = (*asset).clone();
         meshes.insert(id, asset);
         debug!("Reassigned mesh to uuid {:?}", id);
         commands
@@ -148,9 +171,8 @@ fn handle_material(
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let asset = materials.get_mut(h.id()).unwrap();
-        handle_images(images.as_mut(), asset);
-        let asset = (*asset).clone();
+        let mut asset = materials.remove(h.id()).unwrap();
+        handle_images(images.as_mut(), &mut asset);
         materials.insert(id, asset);
         debug!("Reassigned material to uuid {:?}", id);
         commands
@@ -158,6 +180,27 @@ fn handle_material(
             .unwrap()
             .remove::<LoadedSceneItemHandleMaterial>()
             .remove::<Handle<StandardMaterial>>()
+            .insert(Handle::Weak(id));
+    }
+}
+
+fn handle_audio(
+    mut commands: Commands,
+    mut assets: ResMut<Assets<AudioSource>>,
+    query: Query<(Entity, &Handle<AudioSource>), Added<LoadedAudioItem>>,
+) {
+    for (e, h) in query.iter() {
+        let id = AssetId::Uuid {
+            uuid: Uuid::new_v4(),
+        };
+        let asset = assets.remove(h.id()).unwrap();
+        assets.insert(id, asset);
+        debug!("Reassigned audio to uuid {:?}", id);
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<LoadedAudioItem>()
+            .remove::<Handle<AudioSource>>()
             .insert(Handle::Weak(id));
     }
 }
@@ -178,8 +221,7 @@ fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
 }
 
 fn swap_single_image(images: &mut Assets<Image>, image: Handle<Image>) -> Handle<Image> {
-    let image = images.get(image.id()).unwrap();
-    let image = (*image).clone();
+    let image = images.remove(image.id()).unwrap();
     let id = AssetId::Uuid {
         uuid: Uuid::new_v4(),
     };

@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::{app::AppExit, prelude::*, time::common_conditions::on_timer};
 use bevy_sync::Uuid;
 use lux_cli::{Args, Command};
-use lux_world::init;
+use lux_world::{import_audio, init};
 
 fn main() {
     let mut app = App::new();
@@ -18,6 +18,7 @@ fn main() {
         }),
     });
     init(&mut app);
+    app.add_systems(Startup, create);
     app.add_systems(
         Update,
         check_handles.run_if(on_timer(Duration::from_secs(1))),
@@ -25,17 +26,36 @@ fn main() {
     app.run();
 }
 
+fn create(assets: Res<AssetServer>, mut commands: Commands) {
+    import_audio("empty.ogg", &mut commands, &assets);
+}
+
+#[allow(clippy::too_many_arguments)]
 fn check_handles(
     mesh_query: Query<&Handle<Mesh>>,
     material_query: Query<&Handle<StandardMaterial>>,
+    audio_query: Query<&Handle<AudioSource>>,
     meshes: Res<Assets<Mesh>>,
     materials: Res<Assets<StandardMaterial>>,
     images: Res<Assets<Image>>,
+    audios: Res<Assets<AudioSource>>,
     mut quit_events: EventWriter<AppExit>,
 ) {
     let mut mesh_uuid: Option<Uuid> = None;
     let mut material_uuid: Option<Uuid> = None;
     let mut image_uuid: Option<Uuid> = None;
+    let mut audio_uuid: Option<Uuid> = None;
+    for handle in audio_query.iter() {
+        match handle {
+            Handle::Strong(_) => println!("AUDIO IS STRONG HANDLE"),
+            Handle::Weak(id) => {
+                let AssetId::Uuid { uuid: id }: &AssetId<AudioSource> = id else {
+                    break;
+                };
+                audio_uuid = Some(*id);
+            }
+        }
+    }
     for handle in mesh_query.iter() {
         match handle {
             Handle::Strong(_) => {
@@ -79,8 +99,15 @@ fn check_handles(
             }
         }
     }
-    if mesh_uuid.is_some() && material_uuid.is_some() & image_uuid.is_some() {
-        println!("OK: {:?}:{:?}", mesh_uuid, material_uuid);
+    if mesh_uuid.is_some()
+        && material_uuid.is_some()
+        && image_uuid.is_some()
+        && audio_uuid.is_some()
+    {
+        println!(
+            "OK: {:?}:{:?}:{:?}:{:?}",
+            mesh_uuid, material_uuid, image_uuid, audio_uuid
+        );
         quit_events.send(AppExit::Success);
     } else {
         println!("HANDLES MISSING");
@@ -88,4 +115,5 @@ fn check_handles(
     println!("Mesh count: {}", meshes.len());
     println!("Material count: {}", materials.len());
     println!("Image count: {}", images.len());
+    println!("Audio count: {}", audios.len());
 }
