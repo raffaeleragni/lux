@@ -19,10 +19,9 @@ bevy_sync = { git = "https://github.com/raffaeleragni/bevy_sync.git" }
 bevy_editor_pls = { git = "https://github.com/zhaop/bevy_editor_pls", branch = "bevy-0.14" }
 bevy_egui = "0.28"
 # XR -----
-bevy_mod_openxr = { git = "https://github.com/awtterpip/bevy_oxr.git" }
-bevy_mod_xr = { git = "https://github.com/awtterpip/bevy_oxr.git" }
-bevy_xr_utils = { git = "https://github.com/awtterpip/bevy_oxr.git" }
-
+bevy_mod_openxr = "0.1.0-rc1"
+bevy_mod_xr = "0.1.0-rc1"
+bevy_xr_utils = "0.1.0-rc1"
 
 [features]
 default = []
