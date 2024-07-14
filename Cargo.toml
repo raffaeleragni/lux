@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 lux_lib = { path = "crates/lux_lib" }
 
-[corkspace]
+[workspace]
 members = ["crates/*"]
 
 [workspace.dependencies]
