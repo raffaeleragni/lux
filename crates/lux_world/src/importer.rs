@@ -1,15 +1,10 @@
-use bevy::{
-    prelude::*,
-    render::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes},
-    scene::SceneInstance,
-};
+use bevy::{prelude::*, scene::SceneInstance};
 use bevy_sync::{SyncEntity, SyncMark, Uuid};
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
     app.add_systems(Update, (handle_mesh, cleanup_mesh).chain());
     app.add_systems(Update, (handle_material, cleanup_material).chain());
-    app.add_systems(Update, (handle_skinned_mesh, cleanup_skinned_mesh).chain());
 }
 
 pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
@@ -23,7 +18,6 @@ pub(crate) fn import(file_name: &str, commands: &mut Commands, assets: &AssetSer
         LoadedSceneItem,
         LoadedSceneItemHandleMesh,
         LoadedSceneItemHandleMaterial,
-        LoadedSceneItemHandleSkinnedMesh,
     ));
 }
 
@@ -35,9 +29,6 @@ struct LoadedSceneItemHandleMesh;
 
 #[derive(Component)]
 struct LoadedSceneItemHandleMaterial;
-
-#[derive(Component)]
-struct LoadedSceneItemHandleSkinnedMesh;
 
 fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut commands: Commands) {
     for (e, childs) in query.iter() {
@@ -56,7 +47,6 @@ fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut comma
                 .insert(LoadedSceneItem)
                 .insert(LoadedSceneItemHandleMesh)
                 .insert(LoadedSceneItemHandleMaterial)
-                .insert(LoadedSceneItemHandleSkinnedMesh)
                 .insert(SyncMark);
         }
     }
@@ -104,28 +94,6 @@ fn cleanup_material(
             .get_entity(e)
             .unwrap()
             .remove::<LoadedSceneItemHandleMaterial>();
-    }
-}
-
-fn cleanup_skinned_mesh(
-    query_handle_mesh: Query<
-        Entity,
-        (
-            Added<LoadedSceneItemHandleSkinnedMesh>,
-            Without<SkinnedMesh>,
-        ),
-    >,
-    mut commands: Commands,
-) {
-    for e in query_handle_mesh.iter() {
-        debug!(
-            "Cleaning up LoadedSceneItemHandleSkinnedMesh from entity {:?}",
-            e
-        );
-        commands
-            .get_entity(e)
-            .unwrap()
-            .remove::<LoadedSceneItemHandleSkinnedMesh>();
     }
 }
 
@@ -218,23 +186,4 @@ fn swap_single_image(images: &mut Assets<Image>, image: Handle<Image>) -> Handle
     images.insert(id, image);
     debug!("Reassigned image to uuid {:?}", id);
     Handle::Weak(id)
-}
-
-fn handle_skinned_mesh(
-    mut commands: Commands,
-    mut assets: ResMut<Assets<SkinnedMeshInverseBindposes>>,
-    mut query: Query<(Entity, &mut SkinnedMesh), Added<LoadedSceneItemHandleSkinnedMesh>>,
-) {
-    for (e, mut h) in query.iter_mut() {
-        let asset = assets.remove(h.inverse_bindposes.id()).unwrap();
-        let id = AssetId::Uuid {
-            uuid: Uuid::new_v4(),
-        };
-        assets.insert(id, asset);
-        h.inverse_bindposes = Handle::Weak(id);
-        commands
-            .get_entity(e)
-            .unwrap()
-            .remove::<LoadedSceneItemHandleSkinnedMesh>();
-    }
 }
