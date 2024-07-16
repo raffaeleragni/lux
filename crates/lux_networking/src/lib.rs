@@ -1,4 +1,7 @@
-use std::{marker::PhantomData, net::{IpAddr, Ipv6Addr}};
+use std::{
+    marker::PhantomData,
+    net::{IpAddr, Ipv6Addr},
+};
 
 use bevy::{
     pbr::wireframe::Wireframe,
@@ -26,7 +29,7 @@ pub fn init(args: &Args, app: &mut App) {
 #[derive(Component, Default)]
 pub struct ControlledBy<C: Component, F: Component> {
     c: PhantomData<C>,
-    f: PhantomData<F>
+    f: PhantomData<F>,
 }
 
 fn setup_sync(args: &Args, app: &mut App) {
