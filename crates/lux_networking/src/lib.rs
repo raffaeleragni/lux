@@ -1,4 +1,4 @@
-use std::net::{IpAddr, Ipv6Addr};
+use std::{marker::PhantomData, net::{IpAddr, Ipv6Addr}};
 
 use bevy::{
     pbr::wireframe::Wireframe,
@@ -17,6 +17,16 @@ static WEB_PORT: u16 = 4002;
 
 pub fn init(args: &Args, app: &mut App) {
     setup_sync(args, app);
+}
+
+/// This component marks that a component is controlled by another component
+/// This will allow to span or control how many controlling components there
+/// are and if they are zero or 1+, to delete or sidespawn a SyncExclude<C>.
+/// This will not be synched as it is a local only blocker for sending data.
+#[derive(Component, Default)]
+pub struct ControlledBy<C: Component, F: Component> {
+    c: PhantomData<C>,
+    f: PhantomData<F>
 }
 
 fn setup_sync(args: &Args, app: &mut App) {

@@ -1,4 +1,4 @@
-use bevy::{app::ScheduleRunnerPlugin, prelude::*};
+use bevy::{app::ScheduleRunnerPlugin, pbr::PbrPlugin, prelude::*, render::mesh::skinning::SkinnedMeshInverseBindposes, state::app::StatesPlugin};
 use clap::Parser;
 use lux_cli::{Args, Command};
 use std::time::Duration;
@@ -26,7 +26,15 @@ fn base_init(args: &Args, app: &mut App) {
         _ => false,
     };
     if headless {
+        app.add_plugins(StatesPlugin);
         app.add_plugins(AssetPlugin::default());
+        app.init_asset::<Scene>();
+        app.init_asset::<Shader>();
+        app.init_asset::<Mesh>();
+        app.init_asset::<Image>();
+        app.init_asset::<AudioSource>();
+        app.init_asset::<SkinnedMeshInverseBindposes>();
+        app.add_plugins(PbrPlugin::default());
         app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
             Duration::from_secs_f64(1.0 / 60.0),
         )));
