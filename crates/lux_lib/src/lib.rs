@@ -1,7 +1,6 @@
-use bevy::{app::ScheduleRunnerPlugin, pbr::PbrPlugin, prelude::*, render::mesh::skinning::SkinnedMeshInverseBindposes, state::app::StatesPlugin};
+use bevy::prelude::*;
 use clap::Parser;
 use lux_cli::{Args, Command};
-use std::time::Duration;
 
 pub fn app() -> App {
     let mut app = App::new();
@@ -26,30 +25,19 @@ fn base_init(args: &Args, app: &mut App) {
         _ => false,
     };
     if headless {
-        app.add_plugins(StatesPlugin);
-        app.add_plugins(AssetPlugin::default());
-        app.init_asset::<Scene>();
-        app.init_asset::<Shader>();
-        app.init_asset::<Mesh>();
-        app.init_asset::<Image>();
-        app.init_asset::<AudioSource>();
-        app.init_asset::<SkinnedMeshInverseBindposes>();
-        app.add_plugins(PbrPlugin::default());
-        app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
-            Duration::from_secs_f64(1.0 / 60.0),
-        )));
+        lux_headless::init(app);
     } else {
+        let xr_inited = false;
         cfg_if::cfg_if! {
             if #[cfg(feature="xr")] {
                 if args.xr_enabled {
                     lux_xr::init(app);
-                } else {
-                    app.add_plugins(DefaultPlugins);
+                    xr_inited = true;
                 }
-            } else {
-                app.add_plugins(DefaultPlugins);
             }
         }
-        lux_desktop::init(app);
+        if !xr_inited {
+            lux_desktop::init(app);
+        }
     }
 }
