@@ -1,3 +1,5 @@
+use std::process::exit;
+
 use bevy::prelude::*;
 use clap::Parser;
 use lux_cli::{Args, Command};
@@ -30,6 +32,9 @@ fn base_init(args: &Args, app: &mut App) {
         cfg_if::cfg_if! {
             if #[cfg(feature="xr")] {
                 lux_xr::init(app);
+            } else {
+                eprintln!("XR feature is not compiled in.");
+                exit(1);
             }
         }
     } else {
