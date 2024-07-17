@@ -135,9 +135,10 @@ fn handle_mesh(
         if let Some(morphs) = extract_morph_targets(&asset) {
             if morphs.is_strong() {
                 let morphs = morphs.clone();
-                let morphs = swap_single_image(&mut images, morphs);
-                asset.set_morph_targets(morphs);
-                debug!("Reassigned morph targets on {:?}", id);
+                if let Some(morphs) = swap_single_image(&mut images, morphs) {
+                    asset.set_morph_targets(morphs);
+                    debug!("Reassigned morph targets on {:?}", id);
+                }
             }
         }
         meshes.insert(id, asset);
@@ -171,7 +172,9 @@ fn handle_material(
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let mut asset = materials.remove(h.id()).unwrap();
+        let Some(mut asset) = materials.remove(h.id()) else {
+            return;
+        };
         handle_images(images.as_mut(), &mut asset);
         materials.insert(id, asset);
         debug!("Reassigned material to uuid {:?}", id);
@@ -193,7 +196,9 @@ fn handle_audio(
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let asset = assets.remove(h.id()).unwrap();
+        let Some(asset) = assets.remove(h.id()) else {
+            return;
+        };
         assets.insert(id, asset);
         debug!("Reassigned audio to uuid {:?}", id);
         commands
@@ -209,7 +214,7 @@ fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
     macro_rules! swap_image {
         ($image:expr) => {
             if let Some(h) = $image.clone() {
-                $image = Some(swap_single_image(images, h));
+                $image = swap_single_image(images, h);
             }
         };
     }
@@ -220,12 +225,12 @@ fn handle_images(images: &mut Assets<Image>, material: &mut StandardMaterial) {
     swap_image!(material.metallic_roughness_texture);
 }
 
-fn swap_single_image(images: &mut Assets<Image>, image: Handle<Image>) -> Handle<Image> {
-    let image = images.remove(image.id()).unwrap();
+fn swap_single_image(images: &mut Assets<Image>, image: Handle<Image>) -> Option<Handle<Image>> {
+    let image = images.remove(image.id())?;
     let id = AssetId::Uuid {
         uuid: Uuid::new_v4(),
     };
     images.insert(id, image);
     debug!("Reassigned image to uuid {:?}", id);
-    Handle::Weak(id)
+    Some(Handle::Weak(id))
 }
