@@ -4,9 +4,20 @@ pub struct DesktopCameraPlugin;
 
 impl Plugin for DesktopCameraPlugin {
     fn build(&self, app: &mut App) {
+        app.init_state::<DesktopCamera>();
         app.insert_resource(KeyMaps::default());
-        app.add_systems(PreUpdate, (noclip_movement, noclip_look));
+        app.add_systems(
+            PreUpdate,
+            (noclip_movement, noclip_look).run_if(in_state(DesktopCamera::Enabled)),
+        );
     }
+}
+
+#[derive(States, Default, Clone, Eq, PartialEq, Hash, Debug)]
+enum DesktopCamera {
+    #[default]
+    Disabled,
+    Enabled,
 }
 
 #[derive(Resource)]
