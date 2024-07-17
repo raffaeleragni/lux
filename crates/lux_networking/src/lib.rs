@@ -4,6 +4,7 @@ use std::{
 };
 
 use bevy::{
+    ecs::component::{ComponentHooks, StorageType},
     pbr::wireframe::Wireframe,
     prelude::*,
     render::{
@@ -11,7 +12,7 @@ use bevy::{
         primitives::Aabb,
     },
 };
-use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
+use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncExclude, SyncPlugin};
 
 use lux_cli::{Args, Command};
 
@@ -26,10 +27,22 @@ pub fn init(args: &Args, app: &mut App) {
 /// This will allow to span or control how many controlling components there
 /// are and if they are zero or 1+, to delete or sidespawn a SyncExclude<C>.
 /// This will not be synched as it is a local only blocker for sending data.
-#[derive(Component, Default)]
-pub struct ControlledBy<C: Component, F: Component> {
+#[derive(Default)]
+pub struct ControlledBy<C: Component + Default, F: Component> {
     c: PhantomData<C>,
     f: PhantomData<F>,
+}
+
+impl<C: Component + Default, F: Component> Component for ControlledBy<C, F> {
+    const STORAGE_TYPE: StorageType = StorageType::Table;
+    fn register_component_hooks(hooks: &mut ComponentHooks) {
+        hooks.on_add(|mut world, entity_id, _component_id| {
+            world
+                .commands()
+                .entity(entity_id)
+                .insert(SyncExclude::<C>::default());
+        });
+    }
 }
 
 fn setup_sync(args: &Args, app: &mut App) {
@@ -73,4 +86,22 @@ fn setup_sync(args: &Args, app: &mut App) {
         }),
         _ => app,
     };
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use bevy_sync::SyncExclude;
+
+    #[test]
+    fn test_controlled_by_system_adds_component() {
+        let mut app = App::new();
+        let spawn = app
+            .world_mut()
+            .spawn((Name::new(""), ControlledBy::<Name, Aabb>::default()))
+            .id();
+        app.update();
+        let spawn = app.world().entity(spawn);
+        assert!(spawn.get::<SyncExclude<Name>>().is_some());
+    }
 }
