@@ -26,18 +26,13 @@ fn base_init(args: &Args, app: &mut App) {
     };
     if headless {
         lux_headless::init(app);
-    } else {
-        let xr_inited = false;
+    } else if args.xr_enabled {
         cfg_if::cfg_if! {
             if #[cfg(feature="xr")] {
-                if args.xr_enabled {
-                    lux_xr::init(app);
-                    xr_inited = true;
-                }
+                lux_xr::init(app);
             }
         }
-        if !xr_inited {
-            lux_desktop::init(app);
-        }
+    } else {
+        lux_desktop::init(app);
     }
 }
