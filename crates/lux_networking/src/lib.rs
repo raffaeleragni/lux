@@ -42,6 +42,12 @@ impl<C: Component + Default, F: Component> Component for ControlledBy<C, F> {
                 .entity(entity_id)
                 .insert(SyncExclude::<C>::default());
         });
+        hooks.on_remove(|mut world, entity_id, _component_id| {
+            world
+                .commands()
+                .entity(entity_id)
+                .remove::<SyncExclude<C>>();
+        });
     }
 }
 
@@ -101,6 +107,48 @@ mod test {
             .spawn((Name::new(""), ControlledBy::<Name, Aabb>::default()))
             .id();
         app.update();
+
+        let spawn = app.world().entity(spawn);
+        assert!(spawn.get::<SyncExclude<Name>>().is_some());
+    }
+
+    #[test]
+    fn test_controlled_by_system_removes_component() {
+        let mut app = App::new();
+        let spawn = app
+            .world_mut()
+            .spawn((Name::new(""), ControlledBy::<Name, Aabb>::default()))
+            .id();
+        app.update();
+        app.world_mut()
+            .commands()
+            .entity(spawn)
+            .remove::<ControlledBy<Name, Aabb>>();
+        app.update();
+
+        let spawn = app.world().entity(spawn);
+        assert!(spawn.get::<SyncExclude<Name>>().is_none());
+    }
+
+    #[ignore = "unimplemented case"]
+    #[test]
+    fn test_controlled_by_system_not_removed_with_multiple_controlled_by() {
+        let mut app = App::new();
+        let spawn = app
+            .world_mut()
+            .spawn((
+                Name::new(""),
+                ControlledBy::<Name, Aabb>::default(),
+                ControlledBy::<Name, Visibility>::default(),
+            ))
+            .id();
+        app.update();
+        app.world_mut()
+            .commands()
+            .entity(spawn)
+            .remove::<ControlledBy<Name, Aabb>>();
+        app.update();
+
         let spawn = app.world().entity(spawn);
         assert!(spawn.get::<SyncExclude<Name>>().is_some());
     }
