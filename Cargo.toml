@@ -10,7 +10,7 @@ lux_lib = { path = "crates/lux_lib" }
 members = ["crates/*"]
 
 [workspace.dependencies]
-bevy = { version = "0.14", default-features = false }
+bevy = { version = "0.14" }
 #bevy_sync = { path = "../bevy_sync" }
 #bevy_sync = "0.13"
 #bevy_oxr = "0.1.0"

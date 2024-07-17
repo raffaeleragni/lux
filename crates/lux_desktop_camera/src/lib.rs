@@ -145,8 +145,7 @@ fn noclip_look(
 mod test {
     use super::*;
     use bevy::{
-        input::{mouse::MouseMotion, InputPlugin},
-        time::TimePlugin,
+        input::{mouse::MouseMotion, InputPlugin}, state::app::StatesPlugin, time::TimePlugin
     };
     use std::time::Duration;
 
@@ -349,6 +348,7 @@ mod test {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins.build().disable::<TimePlugin>());
         app.add_plugins(InputPlugin);
+        app.add_plugins(StatesPlugin);
         app.add_plugins(DesktopCameraPlugin);
         app.world_mut().spawn((
             SpatialBundle::default(),
@@ -360,6 +360,10 @@ mod test {
             },
         ));
         app.insert_resource::<Time>(Time::new_with(()));
+        app.update();
+        app.world_mut()
+            .resource_mut::<NextState<DesktopCamera>>()
+            .set(DesktopCamera::Enabled);
         app.update();
         app
     }
