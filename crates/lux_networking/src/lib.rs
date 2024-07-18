@@ -1,7 +1,3 @@
-pub use components::ControlledBy;
-
-mod components;
-
 use bevy::{
     pbr::wireframe::Wireframe,
     prelude::*,
