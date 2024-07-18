@@ -95,7 +95,6 @@ mod test {
         assert!(spawn.get::<SyncExclude<Name>>().is_none());
     }
 
-    #[ignore = "unimplemented case"]
     #[test]
     fn test_controlled_by_system_not_removed_with_multiple_controlled_by() {
         let mut app = App::new();
@@ -118,7 +117,6 @@ mod test {
         assert!(spawn.get::<SyncExclude<Name>>().is_some());
     }
 
-    #[ignore = "unimplemented case"]
     #[test]
     fn test_controlled_by_system_removed_with_multiple_controlled_by() {
         let mut app = App::new();
