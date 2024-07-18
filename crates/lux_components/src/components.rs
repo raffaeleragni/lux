@@ -76,8 +76,6 @@ fn counter_dec_and_get(
 
 #[cfg(test)]
 mod test {
-    use std::default;
-
     use super::*;
     use bevy::render::primitives::Aabb;
     use bevy_sync::SyncExclude;
