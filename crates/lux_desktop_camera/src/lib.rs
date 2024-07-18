@@ -145,7 +145,9 @@ fn noclip_look(
 mod test {
     use super::*;
     use bevy::{
-        input::{mouse::MouseMotion, InputPlugin}, state::app::StatesPlugin, time::TimePlugin
+        input::{mouse::MouseMotion, InputPlugin},
+        state::app::StatesPlugin,
+        time::TimePlugin,
     };
     use std::time::Duration;
 
