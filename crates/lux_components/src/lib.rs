@@ -1,5 +1,5 @@
-pub use components::ControlledBy;
+pub use controlled_by::ControlledBy;
 
-mod components;
+mod controlled_by;
 
 pub fn init(_: &mut bevy::prelude::App) {}
