@@ -1,11 +1,14 @@
 use bevy::prelude::*;
+use bevy_sync::SyncComponent;
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct Avatar;
 
 #[derive(Default)]
 pub(crate) struct AvatarPlugin;
 
 impl Plugin for AvatarPlugin {
-    fn build(&self, _: &mut App) {}
+    fn build(&self, app: &mut App) {
+        app.sync_component::<Avatar>();
+    }
 }
