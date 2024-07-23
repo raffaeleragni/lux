@@ -6,7 +6,7 @@ use bevy::{
         primitives::Aabb,
     },
 };
-use bevy_sync::{ClientPlugin, ServerPlugin, SyncComponent, SyncPlugin};
+use bevy_sync::prelude::*;
 use lux_cli::{Args, Command};
 use std::net::{IpAddr, Ipv6Addr};
 
@@ -45,16 +45,20 @@ fn setup_sync(args: &Args, app: &mut App) {
             headless: _,
             ip,
         }) => app.add_plugins(ServerPlugin {
-            ip: ip.unwrap_or(localhost),
-            port: SYNC_PORT,
-            web_port: WEB_PORT,
-            max_transfer: 1_000_000_000,
+            parameters: SyncConnectionParameters {
+                ip: ip.unwrap_or(localhost),
+                port: SYNC_PORT,
+                web_port: WEB_PORT,
+                max_transfer: 1_000_000_000,
+            },
         }),
         Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
-            ip: ip.clone().to_owned(),
-            port: SYNC_PORT,
-            web_port: WEB_PORT + 1,
-            max_transfer: 1_000_000_000,
+            parameters: SyncConnectionParameters {
+                ip: ip.clone().to_owned(),
+                port: SYNC_PORT,
+                web_port: WEB_PORT + 1,
+                max_transfer: 1_000_000_000,
+            },
         }),
         _ => app,
     };
