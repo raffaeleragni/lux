@@ -8,8 +8,8 @@ pub fn app() -> App {
     app.insert_resource(args.clone());
 
     base_init(&args, &mut app);
-    lux_components::init(&mut app);
     lux_networking::init(&args, &mut app);
+    lux_components::init(&mut app);
     lux_world::init(&mut app);
 
     app
