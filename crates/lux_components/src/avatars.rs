@@ -23,8 +23,8 @@ struct Bone<Bones> {
 }
 
 impl Plugin for AvatarPlugin {
-    fn build(&self, app: &mut App) {
-        app.sync_component::<Avatar>();
+    fn build(&self, _app: &mut App) {
+        // app.sync_component::<Avatar>();
     }
 }
 

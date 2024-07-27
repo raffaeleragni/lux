@@ -8,7 +8,7 @@ pub struct User;
 pub(crate) struct UserPlugin;
 
 impl Plugin for UserPlugin {
-    fn build(&self, app: &mut App) {
-        app.sync_component::<User>();
+    fn build(&self, _app: &mut App) {
+        // app.sync_component::<User>();
     }
 }
