@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_sync::SyncComponent;
 
 #[derive(Component, Default, Reflect)]
 pub struct User;
