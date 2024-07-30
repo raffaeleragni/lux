@@ -32,18 +32,26 @@ impl Component for Avatar {
                         .commands()
                         .entity(spine_id)
                         .insert(Bone::<Spine>::default());
-                    let target = "Neck".into();
-                    if let Some(neck_id) = find_by_name_in_childs(&target, spine_id, &world) {
+                    let target = "Chest".into();
+                    if let Some(chest_id) = find_by_name_in_childs(&target, spine_id, &world) {
                         world
                             .commands()
-                            .entity(neck_id)
-                            .insert(Bone::<Neck>::default());
-                        let target = "Head".into();
-                        if let Some(head_id) = find_by_name_in_childs(&target, neck_id, &world) {
+                            .entity(chest_id)
+                            .insert(Bone::<Chest>::default());
+                        let target = "Neck".into();
+                        if let Some(neck_id) = find_by_name_in_childs(&target, chest_id, &world) {
                             world
                                 .commands()
-                                .entity(head_id)
-                                .insert(Bone::<Head>::default());
+                                .entity(neck_id)
+                                .insert(Bone::<Neck>::default());
+                            let target = "Head".into();
+                            if let Some(head_id) = find_by_name_in_childs(&target, neck_id, &world)
+                            {
+                                world
+                                    .commands()
+                                    .entity(head_id)
+                                    .insert(Bone::<Head>::default());
+                            }
                         }
                     }
                 }
@@ -68,6 +76,10 @@ impl Bones for Hips {}
 #[derive(Default)]
 struct Spine;
 impl Bones for Spine {}
+
+#[derive(Default)]
+struct Chest;
+impl Bones for Chest {}
 
 #[derive(Default)]
 struct Neck;
@@ -122,6 +134,7 @@ mod test {
 
         check_bone_name::<Hips>(&mut app, "Hips");
         check_bone_name::<Spine>(&mut app, "Spine");
+        check_bone_name::<Chest>(&mut app, "Chest");
         check_bone_name::<Neck>(&mut app, "Neck");
         check_bone_name::<Head>(&mut app, "Head");
     }
@@ -137,12 +150,14 @@ mod test {
         let arma = app.world_mut().spawn(Name::new("Armature")).id();
         let hips = app.world_mut().spawn(Name::new("Hips")).id();
         let spine = app.world_mut().spawn(Name::new("Spine")).id();
+        let chest = app.world_mut().spawn(Name::new("Chest")).id();
         let neck = app.world_mut().spawn(Name::new("Neck")).id();
         let head = app.world_mut().spawn(Name::new("Head")).id();
         app.world_mut().commands().entity(root).add_child(arma);
         app.world_mut().commands().entity(arma).add_child(hips);
         app.world_mut().commands().entity(hips).add_child(spine);
-        app.world_mut().commands().entity(spine).add_child(neck);
+        app.world_mut().commands().entity(spine).add_child(chest);
+        app.world_mut().commands().entity(chest).add_child(neck);
         app.world_mut().commands().entity(neck).add_child(head);
         root
     }
