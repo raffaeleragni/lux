@@ -12,9 +12,8 @@ members = ["crates/*"]
 [workspace.dependencies]
 bevy = { version = "0.14" }
 bevy_sync = "0.14"
-#bevy_editor_pls = "0.8"
-bevy_editor_pls = { git = "https://github.com/zhaop/bevy_editor_pls", branch = "bevy-0.14" }
-bevy_egui = "0.28"
+bevy_editor_pls = "0.9"
+bevy_egui = "0.29"
 bevy_mod_inverse_kinematics = { git = "https://github.com/Kurble/bevy_mod_inverse_kinematics" }
 # XR -----
 bevy_mod_openxr = "0.1.0-rc1"
