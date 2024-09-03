@@ -7,51 +7,62 @@ use bevy::{
     },
     prelude::*,
 };
+use bevy_sync::SyncComponent;
 
 #[derive(Reflect)]
 pub struct Avatar;
+
+struct BonePair<T: Bones + 'static> {
+    name: &'static str,
+    compo: Bone<T>,
+}
+
+impl<T: Bones> BonePair<T> {
+    fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity> {
+        if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
+            world.commands().entity(found_id).insert(self.compo.clone());
+            return Some(found_id);
+        }
+        warn!("Could not find bone: {}", self.name);
+        None
+    }
+}
 
 impl Component for Avatar {
     const STORAGE_TYPE: StorageType = StorageType::Table;
 
     fn register_component_hooks(hooks: &mut ComponentHooks) {
         hooks.on_add(|mut world, entity_id, _component_id| {
+            let hips = BonePair {
+                name: "Hips",
+                compo: Bone::<Hips>::default(),
+            };
+            let spine = BonePair {
+                name: "Spine",
+                compo: Bone::<Spine>::default(),
+            };
+            let chest = BonePair {
+                name: "Chest",
+                compo: Bone::<Chest>::default(),
+            };
+            let neck = BonePair {
+                name: "Neck",
+                compo: Bone::<Neck>::default(),
+            };
+            let head = BonePair {
+                name: "Head",
+                compo: Bone::<Head>::default(),
+            };
             let target = "Armature".into();
             let Some(armature_id) = find_by_name_in_childs(&target, entity_id, &world) else {
+                warn!("Could not find Armature");
                 return;
             };
-            let target = "Hips".into();
-            if let Some(hips_id) = find_by_name_in_childs(&target, armature_id, &world) {
-                world
-                    .commands()
-                    .entity(hips_id)
-                    .insert(Bone::<Hips>::default());
-                let target = "Spine".into();
-                if let Some(spine_id) = find_by_name_in_childs(&target, hips_id, &world) {
-                    world
-                        .commands()
-                        .entity(spine_id)
-                        .insert(Bone::<Spine>::default());
-                    let target = "Chest".into();
-                    if let Some(chest_id) = find_by_name_in_childs(&target, spine_id, &world) {
-                        world
-                            .commands()
-                            .entity(chest_id)
-                            .insert(Bone::<Chest>::default());
-                        let target = "Neck".into();
-                        if let Some(neck_id) = find_by_name_in_childs(&target, chest_id, &world) {
-                            world
-                                .commands()
-                                .entity(neck_id)
-                                .insert(Bone::<Neck>::default());
-                            let target = "Head".into();
-                            if let Some(head_id) = find_by_name_in_childs(&target, neck_id, &world)
-                            {
-                                world
-                                    .commands()
-                                    .entity(head_id)
-                                    .insert(Bone::<Head>::default());
-                            }
+            if let Some(hips_id) = hips.apply(armature_id, &mut world) {
+                if let Some(spine_id) = spine.apply(hips_id, &mut world) {
+                    if let Some(chest_id) = chest.apply(spine_id, &mut world) {
+                        if let Some(neck_id) = neck.apply(chest_id, &mut world) {
+                            head.apply(neck_id, &mut world);
                         }
                     }
                 }
@@ -63,40 +74,40 @@ impl Component for Avatar {
 #[derive(Default)]
 pub(crate) struct AvatarPlugin;
 
-trait Bones {}
+trait Bones: Default + Send + Sync + Clone {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Root;
 impl Bones for Root {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Hips;
 impl Bones for Hips {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Spine;
 impl Bones for Spine {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Chest;
 impl Bones for Chest {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Neck;
 impl Bones for Neck {}
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Head;
 impl Bones for Head {}
 
-#[derive(Default, Component)]
+#[derive(Default, Clone, Debug, Component)]
 struct Bone<T: Bones> {
     b: PhantomData<T>,
 }
 
 impl Plugin for AvatarPlugin {
-    fn build(&self, _app: &mut App) {
-        // app.sync_component::<Avatar>();
+    fn build(&self, app: &mut App) {
+        app.sync_component::<Avatar>();
     }
 }
 
