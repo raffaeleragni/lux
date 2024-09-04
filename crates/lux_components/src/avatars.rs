@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, sync::LazyLock};
 
 use bevy::{
     ecs::{
@@ -12,12 +12,31 @@ use bevy_sync::SyncComponent;
 #[derive(Reflect)]
 pub struct Avatar;
 
+struct BoneTree {
+    applier: Box<dyn BoneApplier + Send + Sync>,
+    children: Vec<BoneTree>,
+}
+
+impl BoneTree {
+    fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) {
+        if let Some(child_id) = self.applier.apply(parent_id, world) {
+            for child in self.children.iter() {
+                child.apply(child_id, world);
+            }
+        }
+    }
+}
+
+trait BoneApplier {
+    fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity>;
+}
+
 struct BonePair<T: Bones + 'static> {
     name: &'static str,
     compo: Bone<T>,
 }
 
-impl<T: Bones> BonePair<T> {
+impl<T: Bones> BoneApplier for BonePair<T> {
     fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity> {
         if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
             world.commands().entity(found_id).insert(self.compo.clone());
@@ -28,45 +47,56 @@ impl<T: Bones> BonePair<T> {
     }
 }
 
+static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
+    let hips = BonePair {
+        name: "Hips",
+        compo: Bone::<Hips>::default(),
+    };
+    let spine = BonePair {
+        name: "Spine",
+        compo: Bone::<Spine>::default(),
+    };
+    let chest = BonePair {
+        name: "Chest",
+        compo: Bone::<Chest>::default(),
+    };
+    let neck = BonePair {
+        name: "Neck",
+        compo: Bone::<Neck>::default(),
+    };
+    let head = BonePair {
+        name: "Head",
+        compo: Bone::<Head>::default(),
+    };
+    BoneTree {
+        applier: Box::new(hips),
+        children: vec![BoneTree {
+            applier: Box::new(spine),
+            children: vec![BoneTree {
+                applier: Box::new(chest),
+                children: vec![BoneTree {
+                    applier: Box::new(neck),
+                    children: vec![BoneTree {
+                        applier: Box::new(head),
+                        children: vec![],
+                    }],
+                }],
+            }],
+        }],
+    }
+});
+
 impl Component for Avatar {
     const STORAGE_TYPE: StorageType = StorageType::Table;
 
     fn register_component_hooks(hooks: &mut ComponentHooks) {
         hooks.on_add(|mut world, entity_id, _component_id| {
-            let hips = BonePair {
-                name: "Hips",
-                compo: Bone::<Hips>::default(),
-            };
-            let spine = BonePair {
-                name: "Spine",
-                compo: Bone::<Spine>::default(),
-            };
-            let chest = BonePair {
-                name: "Chest",
-                compo: Bone::<Chest>::default(),
-            };
-            let neck = BonePair {
-                name: "Neck",
-                compo: Bone::<Neck>::default(),
-            };
-            let head = BonePair {
-                name: "Head",
-                compo: Bone::<Head>::default(),
-            };
             let target = "Armature".into();
             let Some(armature_id) = find_by_name_in_childs(&target, entity_id, &world) else {
                 warn!("Could not find Armature");
                 return;
             };
-            if let Some(hips_id) = hips.apply(armature_id, &mut world) {
-                if let Some(spine_id) = spine.apply(hips_id, &mut world) {
-                    if let Some(chest_id) = chest.apply(spine_id, &mut world) {
-                        if let Some(neck_id) = neck.apply(chest_id, &mut world) {
-                            head.apply(neck_id, &mut world);
-                        }
-                    }
-                }
-            }
+            BONE_TREE.apply(armature_id, &mut world);
         });
     }
 }
@@ -74,7 +104,7 @@ impl Component for Avatar {
 #[derive(Default)]
 pub(crate) struct AvatarPlugin;
 
-trait Bones: Default + Send + Sync + Clone {}
+trait Bones: Default + Sized + Send + Sync + Clone {}
 
 #[derive(Default, Clone)]
 struct Root;
