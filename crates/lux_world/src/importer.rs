@@ -1,11 +1,13 @@
 use bevy::{prelude::*, scene::SceneInstance};
 use bevy_sync::{SyncEntity, SyncMark, Uuid};
+use lux_components::Avatar;
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
     app.add_systems(Update, (handle_mesh, cleanup_mesh).chain());
     app.add_systems(Update, (handle_material, cleanup_material).chain());
     app.add_systems(Update, (handle_audio, cleanup_audio).chain());
+    app.add_systems(Update, after_spawn_load_avatar);
 }
 
 pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
@@ -16,6 +18,7 @@ pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServe
             scene,
             ..Default::default()
         },
+        LoadAvatar,
         LoadedSceneItem,
         LoadedSceneItemHandleMesh,
         LoadedSceneItemHandleMaterial,
@@ -43,6 +46,22 @@ struct LoadedSceneItemHandleMaterial;
 
 #[derive(Component)]
 struct LoadedAudioItem;
+
+#[derive(Component)]
+struct LoadAvatar;
+
+fn after_spawn_load_avatar(
+    query: Query<(Entity, &Children), With<LoadAvatar>>,
+    mut commands: Commands,
+) {
+    for (e, _) in query.iter() {
+        commands
+            .get_entity(e)
+            .unwrap()
+            .remove::<LoadAvatar>()
+            .insert(Avatar);
+    }
+}
 
 fn propagate(query: Query<(Entity, &Children), With<LoadedSceneItem>>, mut commands: Commands) {
     for (e, childs) in query.iter() {

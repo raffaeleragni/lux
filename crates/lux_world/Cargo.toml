@@ -9,6 +9,7 @@ edition = "2021"
 bevy.workspace = true
 bevy_sync.workspace = true
 lux_cli = { path = "../lux_cli" }
+lux_components = { path = "../lux_components" }
 
 [dev-dependencies]
 bevy_editor_pls.workspace = true
