@@ -9,8 +9,32 @@ use bevy::{
 };
 use bevy_sync::SyncComponent;
 
+#[derive(Default)]
+pub(crate) struct AvatarPlugin;
+
+impl Plugin for AvatarPlugin {
+    fn build(&self, app: &mut App) {
+        app.sync_component::<Avatar>();
+    }
+}
+
 #[derive(Reflect)]
 pub struct Avatar;
+
+impl Component for Avatar {
+    const STORAGE_TYPE: StorageType = StorageType::Table;
+
+    fn register_component_hooks(hooks: &mut ComponentHooks) {
+        hooks.on_add(|mut world, entity_id, _component_id| {
+            let target = "Armature".into();
+            let Some(armature_id) = find_by_name_in_childs(&target, entity_id, &world) else {
+                warn!("Could not find Armature");
+                return;
+            };
+            BONE_TREE.apply(armature_id, &mut world);
+        });
+    }
+}
 
 struct BoneTree {
     applier: Box<dyn BoneApplier + Send + Sync>,
@@ -86,24 +110,6 @@ static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
     }
 });
 
-impl Component for Avatar {
-    const STORAGE_TYPE: StorageType = StorageType::Table;
-
-    fn register_component_hooks(hooks: &mut ComponentHooks) {
-        hooks.on_add(|mut world, entity_id, _component_id| {
-            let target = "Armature".into();
-            let Some(armature_id) = find_by_name_in_childs(&target, entity_id, &world) else {
-                warn!("Could not find Armature");
-                return;
-            };
-            BONE_TREE.apply(armature_id, &mut world);
-        });
-    }
-}
-
-#[derive(Default)]
-pub(crate) struct AvatarPlugin;
-
 trait Bones: Default + Sized + Send + Sync + Clone {}
 
 #[derive(Default, Clone)]
@@ -133,12 +139,6 @@ impl Bones for Head {}
 #[derive(Default, Clone, Debug, Component)]
 struct Bone<T: Bones> {
     b: PhantomData<T>,
-}
-
-impl Plugin for AvatarPlugin {
-    fn build(&self, app: &mut App) {
-        app.sync_component::<Avatar>();
-    }
 }
 
 fn find_by_name_in_childs(target: &Name, start: Entity, world: &DeferredWorld) -> Option<Entity> {
