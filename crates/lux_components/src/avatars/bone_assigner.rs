@@ -67,21 +67,113 @@ pub static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
         name: "Head",
         compo: Bone::<Head>::default(),
     };
+    let arm_l = BonePair {
+        name: "Arm.L",
+        compo: Bone::<ArmL>::default(),
+    };
+    let forearm_l = BonePair {
+        name: "Forearm.L",
+        compo: Bone::<ForearmL>::default(),
+    };
+    let hand_l = BonePair {
+        name: "Hand.L",
+        compo: Bone::<HandL>::default(),
+    };
+    let arm_r = BonePair {
+        name: "Arm.R",
+        compo: Bone::<ArmR>::default(),
+    };
+    let forearm_r = BonePair {
+        name: "Forearm.R",
+        compo: Bone::<ForearmR>::default(),
+    };
+    let hand_r = BonePair {
+        name: "Hand.R",
+        compo: Bone::<HandR>::default(),
+    };
+    let thigh_l = BonePair {
+        name: "Thigh.L",
+        compo: Bone::<ThighL>::default(),
+    };
+    let leg_l = BonePair {
+        name: "Leg.L",
+        compo: Bone::<LegL>::default(),
+    };
+    let foot_l = BonePair {
+        name: "Foot.L",
+        compo: Bone::<FootL>::default(),
+    };
+    let thigh_r = BonePair {
+        name: "Thigh.R",
+        compo: Bone::<ThighR>::default(),
+    };
+    let leg_r = BonePair {
+        name: "Leg.R",
+        compo: Bone::<LegR>::default(),
+    };
+    let foot_r = BonePair {
+        name: "Foot.R",
+        compo: Bone::<FootR>::default(),
+    };
     BoneTree {
         applier: Box::new(hips),
-        children: vec![BoneTree {
-            applier: Box::new(spine),
-            children: vec![BoneTree {
-                applier: Box::new(chest),
+        children: vec![
+            BoneTree {
+                applier: Box::new(thigh_l),
                 children: vec![BoneTree {
-                    applier: Box::new(neck),
+                    applier: Box::new(leg_l),
                     children: vec![BoneTree {
-                        applier: Box::new(head),
+                        applier: Box::new(foot_l),
                         children: vec![],
                     }],
                 }],
-            }],
-        }],
+            },
+            BoneTree {
+                applier: Box::new(thigh_r),
+                children: vec![BoneTree {
+                    applier: Box::new(leg_r),
+                    children: vec![BoneTree {
+                        applier: Box::new(foot_r),
+                        children: vec![],
+                    }],
+                }],
+            },
+            BoneTree {
+                applier: Box::new(spine),
+                children: vec![BoneTree {
+                    applier: Box::new(chest),
+                    children: vec![
+                        BoneTree {
+                            applier: Box::new(neck),
+                            children: vec![BoneTree {
+                                applier: Box::new(head),
+                                children: vec![],
+                            }],
+                        },
+                        BoneTree {
+                            applier: Box::new(arm_l),
+                            children: vec![BoneTree {
+                                applier: Box::new(forearm_l),
+                                children: vec![BoneTree {
+                                    applier: Box::new(hand_l),
+                                    children: vec![],
+                                }],
+                            }],
+                        },
+                        BoneTree {
+                            applier: Box::new(arm_r),
+                            children: vec![BoneTree {
+                                applier: Box::new(forearm_r),
+                                children: vec![BoneTree {
+                                    applier: Box::new(hand_r),
+                                    children: vec![],
+                                }],
+                            }],
+                        },
+                    ],
+                }],
+            },
+        ],
     }
 });
 
