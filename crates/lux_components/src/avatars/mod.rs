@@ -19,6 +19,7 @@ impl Plugin for AvatarPlugin {
 }
 
 #[derive(Reflect)]
+#[reflect(Component)]
 pub struct Avatar;
 
 impl Component for Avatar {
