@@ -2,6 +2,7 @@ use std::sync::LazyLock;
 
 use crate::avatars::bones::*;
 use bevy::{ecs::world::DeferredWorld, prelude::*};
+use bevy_mod_inverse_kinematics::IkConstraint;
 
 pub struct BoneTree {
     applier: Box<dyn BoneApplier + Send + Sync>,
@@ -32,12 +33,19 @@ impl<T: Bones> BoneApplier for BonePair<T> {
     fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity> {
         if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
             let mut cmds = world.commands();
-            let mut e = cmds.entity(found_id);
-            e.insert(self.compo.clone());
+            cmds.entity(found_id).insert(self.compo.clone());
             if let Some(target) = self.target.as_ref() {
-                world
-                    .commands()
-                    .spawn((SpatialBundle { ..default() }, target.clone()));
+                let etid = cmds
+                    .spawn((SpatialBundle { ..default() }, target.clone()))
+                    .id();
+                cmds.entity(found_id).insert(IkConstraint {
+                    chain_length: 2,
+                    iterations: 20,
+                    target: etid,
+                    pole_target: None,
+                    pole_angle: 0.0,
+                    enabled: true,
+                });
             }
             return Some(found_id);
         }
