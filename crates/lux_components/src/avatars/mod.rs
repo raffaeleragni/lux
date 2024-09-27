@@ -1,6 +1,7 @@
 mod bone_assigner;
 mod bones;
 
+use bevy_mod_inverse_kinematics::InverseKinematicsPlugin;
 use bone_assigner::{find_armature, BONE_TREE};
 
 use bevy::{
@@ -15,6 +16,7 @@ pub(crate) struct AvatarPlugin;
 impl Plugin for AvatarPlugin {
     fn build(&self, app: &mut App) {
         app.sync_component::<Avatar>();
+        app.add_plugins(InverseKinematicsPlugin);
     }
 }
 
@@ -64,12 +66,34 @@ mod test {
         check_bone_name::<LegR>(&mut app, "Leg.R");
         check_bone_name::<FootL>(&mut app, "Foot.L");
         check_bone_name::<FootR>(&mut app, "Foot.R");
+
+        check_target_name::<Head>(&mut app, "Head");
+        check_target_name::<HandL>(&mut app, "Hand.L");
+        check_target_name::<HandR>(&mut app, "Hand.R");
+        check_target_name::<FootL>(&mut app, "Foot.L");
+        check_target_name::<FootR>(&mut app, "Foot.R");
     }
 
     fn check_bone_name<T: 'static + Bones + Send + Sync>(app: &mut App, name: &'static str) {
         let mut q = app.world_mut().query_filtered::<&Name, With<Bone<T>>>();
         let found = q.iter(app.world()).next().unwrap();
         assert_eq!(found, &Name::new(name));
+    }
+
+    fn check_target_name<T: 'static + Bones + Send + Sync>(app: &mut App, name: &'static str) {
+        let mut q = app
+            .world_mut()
+            .query_filtered::<(Entity, &Name), With<Bone<T>>>();
+        let found = q.iter(app.world()).next().unwrap();
+        assert_eq!(found.1, &Name::new(name), "bone not found");
+        // cannot have a target in the same bone of the bone, must be another entity
+        assert!(
+            app.world().entity(found.0).get::<Target<T>>().is_none(),
+            "target is in bone"
+        );
+        let mut q = app.world_mut().query_filtered::<Entity, With<Target<T>>>();
+        let found = q.iter(app.world()).next();
+        assert!(found.is_some(), "target not found");
     }
 
     fn add_armature(app: &mut App) -> Entity {

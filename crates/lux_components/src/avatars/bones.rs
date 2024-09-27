@@ -6,7 +6,7 @@ pub trait Bones: Default + Sized + Send + Sync + Clone {}
 
 macro_rules! bone {
     ($name:ident) => {
-        #[derive(Default, Clone)]
+        #[derive(Default, Clone, Debug)]
         pub struct $name;
         impl Bones for $name {}
     };
@@ -14,6 +14,11 @@ macro_rules! bone {
 
 #[derive(Default, Clone, Debug, Component)]
 pub struct Bone<T: Bones> {
+    b: PhantomData<T>,
+}
+
+#[derive(Default, Clone, Debug, Component)]
+pub struct Target<T: Bones> {
     b: PhantomData<T>,
 }
 
