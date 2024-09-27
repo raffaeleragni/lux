@@ -32,11 +32,22 @@ struct BonePair<T: Bones + 'static> {
 impl<T: Bones> BoneApplier for BonePair<T> {
     fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity> {
         if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
+            let tf = world.get::<GlobalTransform>(found_id)?;
+            let pos = tf.translation();
             let mut cmds = world.commands();
             cmds.entity(found_id).insert(self.compo.clone());
             if let Some(target) = self.target.as_ref() {
                 let etid = cmds
-                    .spawn((SpatialBundle { ..default() }, target.clone()))
+                    .spawn((
+                        SpatialBundle {
+                            transform: Transform{
+                                translation: pos,
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        target.clone(),
+                    ))
                     .id();
                 cmds.entity(found_id).insert(IkConstraint {
                     chain_length: 2,
