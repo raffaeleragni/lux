@@ -1,3 +1,4 @@
+pub use avatars::bones as avatar_bones;
 pub use avatars::Avatar;
 pub use controlled_by::ControlledBy;
 pub use local_user::LocalUser;

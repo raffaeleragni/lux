@@ -1,8 +1,8 @@
+pub mod bones;
+
 mod bone_assigner;
-mod bones;
 
 use bevy_mod_inverse_kinematics::InverseKinematicsPlugin;
-use bone_assigner::{find_armature, BONE_TREE};
 
 use bevy::{
     ecs::component::{ComponentHooks, StorageType},
@@ -28,10 +28,8 @@ impl Component for Avatar {
     const STORAGE_TYPE: StorageType = StorageType::Table;
 
     fn register_component_hooks(hooks: &mut ComponentHooks) {
-        hooks.on_add(|mut world, entity_id, _component_id| {
-            if let Some(armature_id) = find_armature(entity_id, &world) {
-                BONE_TREE.apply(armature_id, &mut world);
-            }
+        hooks.on_add(|mut world, id, _component_id| {
+            bone_assigner::apply(id, &mut world);
         });
     }
 }
@@ -49,6 +47,7 @@ mod test {
         app.world_mut().commands().entity(root).insert(Avatar);
         app.update();
 
+        check_bone_name::<Root>(&mut app, "Armature");
         check_bone_name::<Hips>(&mut app, "Hips");
         check_bone_name::<Spine>(&mut app, "Spine");
         check_bone_name::<Chest>(&mut app, "Chest");
@@ -76,8 +75,16 @@ mod test {
 
     fn check_bone_name<T: 'static + Bones + Send + Sync>(app: &mut App, name: &'static str) {
         let mut q = app.world_mut().query_filtered::<&Name, With<Bone<T>>>();
-        let found = q.iter(app.world()).next().unwrap();
-        assert_eq!(found, &Name::new(name));
+        let found = q
+            .iter(app.world())
+            .next()
+            .unwrap_or_else(|| panic!("Expected Bone<> with Name: {}", name));
+        assert_eq!(
+            found,
+            &Name::new(name),
+            "While checking Bone<> for {}",
+            name
+        );
     }
 
     fn check_target_name<T: 'static + Bones + Send + Sync>(app: &mut App, name: &'static str) {
@@ -93,17 +100,38 @@ mod test {
         );
         let mut q = app.world_mut().query_filtered::<Entity, With<Target<T>>>();
         let found = q.iter(app.world()).next();
-        assert!(found.is_some(), "target not found");
+        assert!(found.is_some(), "target not found, name {}", name);
     }
 
     fn add_armature(app: &mut App) -> Entity {
-        let root = app.world_mut().spawn(Name::new("Root")).id();
-        let arma = app.world_mut().spawn(Name::new("Armature")).id();
-        let hips = app.world_mut().spawn(Name::new("Hips")).id();
-        let spine = app.world_mut().spawn(Name::new("Spine")).id();
-        let chest = app.world_mut().spawn(Name::new("Chest")).id();
-        let neck = app.world_mut().spawn(Name::new("Neck")).id();
-        let head = app.world_mut().spawn(Name::new("Head")).id();
+        let root = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Root")))
+            .id();
+        let arma = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Armature")))
+            .id();
+        let hips = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Hips")))
+            .id();
+        let spine = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Spine")))
+            .id();
+        let chest = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Chest")))
+            .id();
+        let neck = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Neck")))
+            .id();
+        let head = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Head")))
+            .id();
         app.world_mut().commands().entity(root).add_child(arma);
         app.world_mut().commands().entity(arma).add_child(hips);
         app.world_mut().commands().entity(hips).add_child(spine);
@@ -111,12 +139,30 @@ mod test {
         app.world_mut().commands().entity(chest).add_child(neck);
         app.world_mut().commands().entity(neck).add_child(head);
 
-        let arm_l = app.world_mut().spawn(Name::new("Arm.L")).id();
-        let forearm_l = app.world_mut().spawn(Name::new("Forearm.L")).id();
-        let hand_l = app.world_mut().spawn(Name::new("Hand.L")).id();
-        let arm_r = app.world_mut().spawn(Name::new("Arm.R")).id();
-        let forearm_r = app.world_mut().spawn(Name::new("Forearm.R")).id();
-        let hand_r = app.world_mut().spawn(Name::new("Hand.R")).id();
+        let arm_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Arm.L")))
+            .id();
+        let forearm_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Forearm.L")))
+            .id();
+        let hand_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Hand.L")))
+            .id();
+        let arm_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Arm.R")))
+            .id();
+        let forearm_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Forearm.R")))
+            .id();
+        let hand_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Hand.R")))
+            .id();
         app.world_mut().commands().entity(chest).add_child(arm_l);
         app.world_mut()
             .commands()
@@ -136,12 +182,30 @@ mod test {
             .entity(forearm_r)
             .add_child(hand_r);
 
-        let thigh_l = app.world_mut().spawn(Name::new("Thigh.L")).id();
-        let leg_l = app.world_mut().spawn(Name::new("Leg.L")).id();
-        let foot_l = app.world_mut().spawn(Name::new("Foot.L")).id();
-        let thigh_r = app.world_mut().spawn(Name::new("Thigh.R")).id();
-        let leg_r = app.world_mut().spawn(Name::new("Leg.R")).id();
-        let foot_r = app.world_mut().spawn(Name::new("Foot.R")).id();
+        let thigh_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Thigh.L")))
+            .id();
+        let leg_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Leg.L")))
+            .id();
+        let foot_l = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Foot.L")))
+            .id();
+        let thigh_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Thigh.R")))
+            .id();
+        let leg_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Leg.R")))
+            .id();
+        let foot_r = app
+            .world_mut()
+            .spawn((GlobalTransform::default(), Name::new("Foot.R")))
+            .id();
         app.world_mut().commands().entity(hips).add_child(thigh_l);
         app.world_mut().commands().entity(thigh_l).add_child(leg_l);
         app.world_mut().commands().entity(leg_l).add_child(foot_l);

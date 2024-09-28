@@ -4,77 +4,32 @@ use crate::avatars::bones::*;
 use bevy::{ecs::world::DeferredWorld, prelude::*};
 use bevy_mod_inverse_kinematics::IkConstraint;
 
-pub struct BoneTree {
+pub fn apply(id: Entity, world: &mut DeferredWorld) {
+    if let Some(armature_id) = find_armature_entity_id(id, world) {
+        world
+            .commands()
+            .entity(armature_id)
+            .insert(Bone::<Root>::default());
+        BONE_TREE.apply(armature_id, armature_id, world);
+    }
+}
+
+struct BoneTree {
     applier: Box<dyn BoneApplier + Send + Sync>,
     children: Vec<BoneTree>,
 }
 
 impl BoneTree {
-    pub fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) {
-        if let Some(child_id) = self.applier.apply(parent_id, world) {
+    fn apply(&self, armature_id: Entity, id: Entity, world: &mut DeferredWorld) {
+        if let Some(child_id) = self.applier.apply(armature_id, id, world) {
             for child in self.children.iter() {
-                child.apply(child_id, world);
+                child.apply(armature_id, child_id, world);
             }
         }
     }
 }
 
-trait BoneApplier {
-    fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity>;
-}
-
-struct BonePair<T: Bones + 'static> {
-    name: &'static str,
-    compo: Bone<T>,
-    target: Option<Target<T>>,
-}
-
-impl<T: Bones> BoneApplier for BonePair<T> {
-    fn apply(&self, parent_id: Entity, world: &mut DeferredWorld) -> Option<Entity> {
-        if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
-            let tf = world.get::<GlobalTransform>(found_id)?;
-            let pos = tf.translation();
-            let mut cmds = world.commands();
-            cmds.entity(found_id).insert(self.compo.clone());
-            if let Some(target) = self.target.as_ref() {
-                let etid = cmds
-                    .spawn((
-                        SpatialBundle {
-                            transform: Transform{
-                                translation: pos,
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        target.clone(),
-                    ))
-                    .id();
-                cmds.entity(found_id).insert(IkConstraint {
-                    chain_length: 2,
-                    iterations: 20,
-                    target: etid,
-                    pole_target: None,
-                    pole_angle: 0.0,
-                    enabled: true,
-                });
-            }
-            return Some(found_id);
-        }
-        warn!("Could not find bone: {}", self.name);
-        None
-    }
-}
-
-pub fn find_armature(entity_id: Entity, world: &DeferredWorld) -> Option<Entity> {
-    let target = "Armature".into();
-    let Some(armature_id) = find_by_name_in_childs(&target, entity_id, world) else {
-        warn!("Could not find Armature");
-        return None;
-    };
-    Some(armature_id)
-}
-
-pub static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
+static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
     let hips = BonePair {
         name: "Hips",
         compo: Bone::<Hips>::default(),
@@ -221,6 +176,74 @@ pub static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
         ],
     }
 });
+
+trait BoneApplier {
+    fn apply(
+        &self,
+        armature_id: Entity,
+        parent_id: Entity,
+        world: &mut DeferredWorld,
+    ) -> Option<Entity>;
+}
+
+struct BonePair<T: Bones + 'static> {
+    name: &'static str,
+    compo: Bone<T>,
+    target: Option<Target<T>>,
+}
+
+impl<T: Bones> BoneApplier for BonePair<T> {
+    fn apply(
+        &self,
+        armature_id: Entity,
+        parent_id: Entity,
+        world: &mut DeferredWorld,
+    ) -> Option<Entity> {
+        if let Some(found_id) = find_by_name_in_childs(&self.name.into(), parent_id, world) {
+            let tf = world.get::<GlobalTransform>(found_id)?;
+            let pos = tf.translation();
+            let mut cmds = world.commands();
+            cmds.entity(found_id).insert(self.compo.clone());
+            if let Some(target) = self.target.as_ref() {
+                let etid = cmds
+                    .spawn((
+                        SpatialBundle {
+                            transform: Transform {
+                                translation: pos,
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        Name::new(format!("Target:{}", target.name())),
+                        target.clone(),
+                    ))
+                    .id();
+                cmds.entity(armature_id).add_child(etid);
+
+                cmds.entity(found_id).insert(IkConstraint {
+                    chain_length: 2,
+                    iterations: 20,
+                    target: etid,
+                    pole_target: None,
+                    pole_angle: 0.0,
+                    enabled: true,
+                });
+            }
+            return Some(found_id);
+        }
+        warn!("Could not find bone: {}", self.name);
+        None
+    }
+}
+
+fn find_armature_entity_id(entity_id: Entity, world: &DeferredWorld) -> Option<Entity> {
+    let target = "Armature".into();
+    let Some(armature_id) = find_by_name_in_childs(&target, entity_id, world) else {
+        warn!("Could not find Armature");
+        return None;
+    };
+    Some(armature_id)
+}
 
 fn find_by_name_in_childs(target: &Name, start: Entity, world: &DeferredWorld) -> Option<Entity> {
     let mut queue = vec![start];
