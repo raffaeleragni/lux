@@ -9,6 +9,9 @@ use bevy::{
     prelude::*,
 };
 use bevy_sync::SyncComponent;
+use bones::{FootL, FootR, HandL, HandR, Head, Target};
+
+use crate::{ComponentEntityRef, LocalUser};
 
 #[derive(Default)]
 pub(crate) struct AvatarPlugin;
@@ -17,6 +20,8 @@ impl Plugin for AvatarPlugin {
     fn build(&self, app: &mut App) {
         app.sync_component::<Avatar>();
         app.add_plugins(InverseKinematicsPlugin);
+        app.add_systems(Update, local_user_enters);
+        app.add_systems(Update, local_user_exits);
     }
 }
 
@@ -34,8 +39,58 @@ impl Component for Avatar {
     }
 }
 
+#[allow(clippy::type_complexity)]
+fn local_user_enters(
+    mut cmd: Commands,
+    q: Query<
+        (
+            &ComponentEntityRef<Target<Head>>,
+            &ComponentEntityRef<Target<HandL>>,
+            &ComponentEntityRef<Target<HandR>>,
+            &ComponentEntityRef<Target<FootL>>,
+            &ComponentEntityRef<Target<FootR>>,
+        ),
+        (With<Avatar>, Added<LocalUser>),
+    >,
+) {
+    for (cer_head, cer_hand_l, cer_hand_r, cer_foot_l, cer_foot_r) in q.iter() {
+        cmd.entity(cer_head.entity_id).try_insert(LocalUser);
+        cmd.entity(cer_hand_l.entity_id).try_insert(LocalUser);
+        cmd.entity(cer_hand_r.entity_id).try_insert(LocalUser);
+        cmd.entity(cer_foot_l.entity_id).try_insert(LocalUser);
+        cmd.entity(cer_foot_r.entity_id).try_insert(LocalUser);
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn local_user_exits(
+    mut cmd: Commands,
+    mut removed: RemovedComponents<LocalUser>,
+    q: Query<
+        (
+            &ComponentEntityRef<Target<Head>>,
+            &ComponentEntityRef<Target<HandL>>,
+            &ComponentEntityRef<Target<HandR>>,
+            &ComponentEntityRef<Target<FootL>>,
+            &ComponentEntityRef<Target<FootR>>,
+        ),
+        With<Avatar>,
+    >,
+) {
+    for entity in removed.read() {
+        let Ok(res) = q.get(entity) else { continue };
+        cmd.entity(res.0.entity_id).remove::<LocalUser>();
+        cmd.entity(res.1.entity_id).remove::<LocalUser>();
+        cmd.entity(res.2.entity_id).remove::<LocalUser>();
+        cmd.entity(res.3.entity_id).remove::<LocalUser>();
+        cmd.entity(res.4.entity_id).remove::<LocalUser>();
+    }
+}
+
 #[cfg(test)]
 mod test {
+    use crate::ComponentEntityRef;
+
     use super::*;
     use bones::*;
 
@@ -44,7 +99,7 @@ mod test {
         let mut app = app();
         let root = add_armature(&mut app);
         app.update();
-        app.world_mut().commands().entity(root).insert(Avatar);
+        app.world_mut().commands().entity(root).try_insert(Avatar);
         app.update();
 
         check_bone_name::<Root>(&mut app, "Armature");
@@ -71,6 +126,57 @@ mod test {
         check_target_name::<HandR>(&mut app, "Hand.R");
         check_target_name::<FootL>(&mut app, "Foot.L");
         check_target_name::<FootR>(&mut app, "Foot.R");
+
+        app.world_mut().commands().entity(root).try_insert(LocalUser);
+        app.update();
+
+        assert!(
+            compo_has::<Target<Head>, LocalUser>(&mut app),
+            "Target<Head> missing LocalUser"
+        );
+        assert!(
+            compo_has::<Target<HandL>, LocalUser>(&mut app),
+            "Target<HandL> missing LocalUser"
+        );
+        assert!(
+            compo_has::<Target<HandR>, LocalUser>(&mut app),
+            "Target<HandR> missing LocalUser"
+        );
+        assert!(
+            compo_has::<Target<FootL>, LocalUser>(&mut app),
+            "Target<FootR> missing LocalUser"
+        );
+        assert!(
+            compo_has::<Target<FootR>, LocalUser>(&mut app),
+            "Target<FootR> missing LocalUser"
+        );
+
+        app.world_mut()
+            .commands()
+            .entity(root)
+            .remove::<LocalUser>();
+        app.update();
+
+        assert!(
+            !compo_has::<Target<Head>, LocalUser>(&mut app),
+            "Target<Head> has LocalUser"
+        );
+        assert!(
+            !compo_has::<Target<HandL>, LocalUser>(&mut app),
+            "Target<HandL> has LocalUser"
+        );
+        assert!(
+            !compo_has::<Target<HandR>, LocalUser>(&mut app),
+            "Target<HandR> has LocalUser"
+        );
+        assert!(
+            !compo_has::<Target<FootL>, LocalUser>(&mut app),
+            "Target<FootR> has LocalUser"
+        );
+        assert!(
+            !compo_has::<Target<FootR>, LocalUser>(&mut app),
+            "Target<FootR> has LocalUser"
+        );
     }
 
     fn check_bone_name<T: 'static + Bones + Send + Sync>(app: &mut App, name: &'static str) {
@@ -99,8 +205,30 @@ mod test {
             "target is in bone"
         );
         let mut q = app.world_mut().query_filtered::<Entity, With<Target<T>>>();
-        let found = q.iter(app.world()).next();
-        assert!(found.is_some(), "target not found, name {}", name);
+        let found_eid_target = q
+            .iter(app.world())
+            .next()
+            .unwrap_or_else(|| panic!("target not found, name {}", name));
+        // Every Avatar entity has references to the targets
+        let mut q = app
+            .world_mut()
+            .query_filtered::<&ComponentEntityRef<Target<T>>, With<Avatar>>();
+        let found_eid = q
+            .iter(app.world())
+            .next()
+            .unwrap_or_else(|| panic!("Found no ComponentEntityRef for Target name: {}", name));
+        assert_eq!(
+            found_eid_target, found_eid.entity_id,
+            "ComponentEntityRef for Target name: {}, wrong entity id: {}",
+            name, found_eid_target
+        );
+    }
+
+    fn compo_has<FROM: Component, TO: Component>(app: &mut App) -> bool {
+        let mut q = app
+            .world_mut()
+            .query_filtered::<Entity, (With<FROM>, With<TO>)>();
+        q.iter(app.world()).next().is_some()
     }
 
     fn add_armature(app: &mut App) -> Entity {

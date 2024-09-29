@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use crate::avatars::bones::*;
+use crate::{avatars::bones::*, ComponentEntityRef};
 use bevy::{ecs::world::DeferredWorld, prelude::*};
 use bevy_mod_inverse_kinematics::IkConstraint;
 
@@ -10,7 +10,7 @@ pub fn apply(id: Entity, world: &mut DeferredWorld) {
             .commands()
             .entity(armature_id)
             .insert(Bone::<Root>::default());
-        BONE_TREE.apply(armature_id, armature_id, world);
+        BONE_TREE.apply(id, armature_id, armature_id, world);
     }
 }
 
@@ -20,10 +20,10 @@ struct BoneTree {
 }
 
 impl BoneTree {
-    fn apply(&self, armature_id: Entity, id: Entity, world: &mut DeferredWorld) {
-        if let Some(child_id) = self.applier.apply(armature_id, id, world) {
+    fn apply(&self, avatar_id: Entity, armature_id: Entity, id: Entity, world: &mut DeferredWorld) {
+        if let Some(child_id) = self.applier.apply(avatar_id, armature_id, id, world) {
             for child in self.children.iter() {
-                child.apply(armature_id, child_id, world);
+                child.apply(avatar_id, armature_id, child_id, world);
             }
         }
     }
@@ -180,6 +180,7 @@ static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
 trait BoneApplier {
     fn apply(
         &self,
+        avatar_id: Entity,
         armature_id: Entity,
         parent_id: Entity,
         world: &mut DeferredWorld,
@@ -195,6 +196,7 @@ struct BonePair<T: Bones + 'static> {
 impl<T: Bones> BoneApplier for BonePair<T> {
     fn apply(
         &self,
+        avatar_id: Entity,
         armature_id: Entity,
         parent_id: Entity,
         world: &mut DeferredWorld,
@@ -219,6 +221,7 @@ impl<T: Bones> BoneApplier for BonePair<T> {
                     ))
                     .id();
                 cmds.entity(armature_id).add_child(etid);
+                cmds.entity(avatar_id).insert(ComponentEntityRef::<Target<T>>::new(etid));
 
                 cmds.entity(found_id).insert(IkConstraint {
                     chain_length: 2,

@@ -5,7 +5,6 @@ mod layouts;
 mod menu;
 
 pub fn init(app: &mut App) {
-    app.add_plugins(DefaultPlugins);
     app.world_mut().spawn((
         NoClip::default(),
         Camera3dBundle {

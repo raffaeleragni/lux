@@ -30,12 +30,14 @@ fn base_init(args: &Args, app: &mut App) {
         cfg_if::cfg_if! {
             if #[cfg(feature="xr")] {
                 lux_xr::init(app);
+                lux_desktop::init(app);
             } else {
                 eprintln!("XR feature is not compiled in.");
                 std::process::exit(1);
             }
         }
     } else {
+        app.add_plugins(DefaultPlugins);
         lux_desktop::init(app);
     }
 }
