@@ -1,4 +1,6 @@
+mod avatar_assigner;
 mod flightcam;
+mod naming;
 
 use bevy::prelude::*;
 use bevy_mod_openxr::add_xr_plugins;
@@ -11,7 +13,9 @@ pub fn init(app: &mut App) {
         .add_plugins(HandGizmosPlugin)
         .add_plugins(XRUtilsActionsPlugin)
         .add_systems(PostUpdate, quit_xr_on_app_exit);
+    naming::init(app);
     flightcam::init(app);
+    avatar_assigner::init(app);
 }
 
 fn quit_xr_on_app_exit(

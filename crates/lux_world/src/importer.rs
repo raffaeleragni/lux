@@ -1,6 +1,6 @@
 use bevy::{prelude::*, scene::SceneInstance};
 use bevy_sync::{SyncEntity, SyncMark, Uuid};
-use lux_components::Avatar;
+use lux_components::{Avatar, LocalUser};
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
@@ -13,7 +13,9 @@ pub(crate) fn init(app: &mut App) {
 pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let scene = assets.load(file_name.to_owned() + "#Scene0");
     debug!("Loading SceneBundle: {:?}", scene);
+    let name = file_name.to_string();
     commands.spawn((
+        Name::new(name),
         SceneBundle {
             scene,
             ..Default::default()
@@ -59,7 +61,8 @@ fn after_spawn_load_avatar(
             .get_entity(e)
             .unwrap()
             .remove::<LoadAvatar>()
-            .insert(Avatar);
+            .insert(Avatar)
+            .insert(LocalUser);
     }
 }
 

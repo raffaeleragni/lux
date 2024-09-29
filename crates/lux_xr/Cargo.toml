@@ -10,4 +10,5 @@ bevy.workspace = true
 bevy_mod_openxr.workspace = true
 bevy_mod_xr.workspace = true
 bevy_xr_utils.workspace = true
+lux_components = { path = "../lux_components/" }
 
