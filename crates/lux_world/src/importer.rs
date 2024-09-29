@@ -153,7 +153,7 @@ fn handle_mesh(
         let id = AssetId::Uuid {
             uuid: Uuid::new_v4(),
         };
-        let mut asset = meshes.remove(h.id()).unwrap();
+        let Some(mut asset) = meshes.remove(h.id()) else {continue;};
         if let Some(morphs) = extract_morph_targets(&asset) {
             if morphs.is_strong() {
                 let morphs = morphs.clone();

@@ -10,6 +10,10 @@ pub fn apply(id: Entity, world: &mut DeferredWorld) {
             .commands()
             .entity(armature_id)
             .insert(Bone::<Root>::default());
+        world
+            .commands()
+            .entity(id)
+            .insert(ComponentEntityRef::<Bone<Root>>::new(armature_id));
         BONE_TREE.apply(id, armature_id, armature_id, world);
     }
 }
@@ -206,6 +210,8 @@ impl<T: Bones> BoneApplier for BonePair<T> {
             let pos = tf.translation();
             let mut cmds = world.commands();
             cmds.entity(found_id).insert(self.compo.clone());
+            cmds.entity(avatar_id)
+                .insert(ComponentEntityRef::<Bone<T>>::new(found_id));
             if let Some(target) = self.target.as_ref() {
                 let etid = cmds
                     .spawn((
@@ -221,7 +227,8 @@ impl<T: Bones> BoneApplier for BonePair<T> {
                     ))
                     .id();
                 cmds.entity(armature_id).add_child(etid);
-                cmds.entity(avatar_id).insert(ComponentEntityRef::<Target<T>>::new(etid));
+                cmds.entity(avatar_id)
+                    .insert(ComponentEntityRef::<Target<T>>::new(etid));
 
                 cmds.entity(found_id).insert(IkConstraint {
                     chain_length: 2,

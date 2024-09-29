@@ -9,7 +9,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_sync::SyncComponent;
-use bones::{FootL, FootR, HandL, HandR, Head, Target};
+use bones::{Bone, FootL, FootR, HandL, HandR, Head, Root, Target};
 
 use crate::{ComponentEntityRef, LocalUser};
 
@@ -44,6 +44,7 @@ fn local_user_enters(
     mut cmd: Commands,
     q: Query<
         (
+            &ComponentEntityRef<Bone<Root>>,
             &ComponentEntityRef<Target<Head>>,
             &ComponentEntityRef<Target<HandL>>,
             &ComponentEntityRef<Target<HandR>>,
@@ -53,12 +54,13 @@ fn local_user_enters(
         (With<Avatar>, Added<LocalUser>),
     >,
 ) {
-    for (cer_head, cer_hand_l, cer_hand_r, cer_foot_l, cer_foot_r) in q.iter() {
-        cmd.entity(cer_head.entity_id).try_insert(LocalUser);
-        cmd.entity(cer_hand_l.entity_id).try_insert(LocalUser);
-        cmd.entity(cer_hand_r.entity_id).try_insert(LocalUser);
-        cmd.entity(cer_foot_l.entity_id).try_insert(LocalUser);
-        cmd.entity(cer_foot_r.entity_id).try_insert(LocalUser);
+    for cer in q.iter() {
+        cmd.entity(cer.0.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.1.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.2.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.3.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.4.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.5.entity_id).try_insert(LocalUser);
     }
 }
 
@@ -68,6 +70,7 @@ fn local_user_exits(
     mut removed: RemovedComponents<LocalUser>,
     q: Query<
         (
+            &ComponentEntityRef<Bone<Root>>,
             &ComponentEntityRef<Target<Head>>,
             &ComponentEntityRef<Target<HandL>>,
             &ComponentEntityRef<Target<HandR>>,
@@ -84,6 +87,7 @@ fn local_user_exits(
         cmd.entity(res.2.entity_id).remove::<LocalUser>();
         cmd.entity(res.3.entity_id).remove::<LocalUser>();
         cmd.entity(res.4.entity_id).remove::<LocalUser>();
+        cmd.entity(res.5.entity_id).remove::<LocalUser>();
     }
 }
 
@@ -127,9 +131,16 @@ mod test {
         check_target_name::<FootL>(&mut app, "Foot.L");
         check_target_name::<FootR>(&mut app, "Foot.R");
 
-        app.world_mut().commands().entity(root).try_insert(LocalUser);
+        app.world_mut()
+            .commands()
+            .entity(root)
+            .try_insert(LocalUser);
         app.update();
 
+        assert!(
+            compo_has::<Bone<Root>, LocalUser>(&mut app),
+            "Bone<Root> missing LocalUser"
+        );
         assert!(
             compo_has::<Target<Head>, LocalUser>(&mut app),
             "Target<Head> missing LocalUser"
@@ -157,6 +168,10 @@ mod test {
             .remove::<LocalUser>();
         app.update();
 
+        assert!(
+            !compo_has::<Target<Head>, LocalUser>(&mut app),
+            "Bone<Root> has LocalUser"
+        );
         assert!(
             !compo_has::<Target<Head>, LocalUser>(&mut app),
             "Target<Head> has LocalUser"
