@@ -13,7 +13,7 @@ members = ["crates/*"]
 bevy = { version = "0.14" }
 bevy_sync = "0.14"
 bevy_editor_pls = "0.9"
-bevy_egui = "0.29"
+bevy_egui = "0.28"
 
 # Below are unstable crates that require patching or forking
 
