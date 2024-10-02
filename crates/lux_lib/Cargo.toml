@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 cfg-if.workspace = true
 clap.workspace = true
-serde.workspace = true
 bevy.workspace = true
 bevy_sync.workspace = true
 lux_cli = { path = "../lux_cli" }
