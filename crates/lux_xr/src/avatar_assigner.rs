@@ -1,13 +1,24 @@
+#![allow(clippy::type_complexity)]
+
 use bevy::prelude::*;
-use bevy_mod_xr::session::XrTrackingRoot;
-use lux_components::{Avatar, LocalUser};
+use bevy_mod_xr::{
+    hands::{HandBone, LeftHand, RightHand},
+    session::XrTrackingRoot,
+};
+use lux_components::{
+    avatar_bones::{HandL, HandR, Target},
+    Avatar, LocalUser,
+};
 
 pub fn init(app: &mut App) {
     app.add_systems(
         Update,
         (local_user_exits_root, local_user_enters_root).chain(),
     );
-    // app.add_systems(Update, (copy_xr_view_transform).chain());
+    app.add_systems(
+        Update,
+        (copy_transform_hand_l, copy_transform_hand_r).chain(),
+    );
 }
 
 fn local_user_enters_root(
@@ -31,6 +42,34 @@ fn local_user_exits_root(
     for entity in removed.read() {
         if let Ok(e) = q.get(entity) {
             cmd.entity(e).remove_parent();
+        }
+    }
+}
+
+fn copy_transform_hand_l(
+    src: Query<(&Transform, &HandBone), With<LeftHand>>,
+    mut dst: Query<&mut Transform, (Without<LeftHand>, With<Target<HandL>>, With<LocalUser>)>,
+) {
+    for mut tfd in dst.iter_mut() {
+        for (tfs, b) in src.iter() {
+            if let HandBone::Palm = b {
+                tfd.translation = tfs.translation;
+                tfd.rotation = tfs.rotation;
+            }
+        }
+    }
+}
+
+fn copy_transform_hand_r(
+    src: Query<(&Transform, &HandBone), With<RightHand>>,
+    mut dst: Query<&mut Transform, (Without<RightHand>, With<Target<HandR>>, With<LocalUser>)>,
+) {
+    for mut tfd in dst.iter_mut() {
+        for (tfs, b) in src.iter() {
+            if let HandBone::Palm = b {
+                tfd.translation = tfs.translation;
+                tfd.rotation = tfs.rotation;
+            }
         }
     }
 }
