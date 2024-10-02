@@ -10,6 +10,9 @@ lux_lib = { path = "crates/lux_lib" }
 members = ["crates/*"]
 
 [workspace.dependencies]
+cfg-if = "1.0.0"
+serde = { version = "1.0.210", features = ["derive"] }
+clap = { version = "4.5.19", features = ["derive"] }
 bevy = { version = "0.14" }
 bevy_sync = "0.14"
 bevy_editor_pls = "0.9"

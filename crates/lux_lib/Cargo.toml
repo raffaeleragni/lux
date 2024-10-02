@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cfg-if = "1.0.0"
-clap = { version = "4.3.0", features = ["derive"] }
-serde = { version = "1.0.160", features = ["derive"] }
+cfg-if.workspace = true
+clap.workspace = true
+serde.workspace = true
 bevy.workspace = true
 bevy_sync.workspace = true
 lux_cli = { path = "../lux_cli" }
