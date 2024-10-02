@@ -14,11 +14,15 @@ bevy = { version = "0.14" }
 bevy_sync = "0.14"
 bevy_editor_pls = "0.9"
 bevy_egui = "0.29"
-bevy_mod_inverse_kinematics = { git = "https://github.com/Kurble/bevy_mod_inverse_kinematics" }
+
+# Below are unstable crates that require patching or forking
+
+# IK -----
+bevy_mod_inverse_kinematics = { git = "https://github.com/raffaeleragni/bevy_mod_inverse_kinematics" }
 # XR -----
-bevy_mod_openxr = "0.1.0-rc1"
-bevy_mod_xr = "0.1.0-rc1"
-bevy_xr_utils = "0.1.0-rc1"
+bevy_mod_openxr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
+bevy_mod_xr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
+bevy_xr_utils = { git = "https://github.com/raffaeleragni/bevy_oxr" }
 
 [features]
 default = []
