@@ -14,10 +14,13 @@ cfg-if = "1.0.0"
 clap = { version = "4.5.19", features = ["derive"] }
 bevy = { version = "0.14" }
 bevy_sync = "0.14.3"
-bevy_editor_pls = "0.9"
-bevy_egui = "0.28"
+bevy_egui = "0.29"
+bevy_console = "0.12.1"
 
 # Below are unstable crates that require patching or forking
+
+# Editor -
+bevy_editor_pls = { git = "https://github.com/raffaeleragni/bevy_editor_pls" }
 
 # IK -----
 bevy_mod_inverse_kinematics = { git = "https://github.com/raffaeleragni/bevy_mod_inverse_kinematics" }
