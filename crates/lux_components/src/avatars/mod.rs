@@ -1,8 +1,10 @@
+#![allow(clippy::type_complexity)]
+
 pub mod bones;
 
 mod bone_assigner;
 
-use bevy_mod_inverse_kinematics::InverseKinematicsPlugin;
+use bevy_mod_inverse_kinematics::{IkConstraint, InverseKinematicsPlugin};
 
 use bevy::{
     ecs::component::{ComponentHooks, StorageType},
@@ -22,6 +24,7 @@ impl Plugin for AvatarPlugin {
         app.add_plugins(InverseKinematicsPlugin);
         app.add_systems(Update, local_user_enters);
         app.add_systems(Update, local_user_exits);
+        app.add_systems(Update, copy_roation_target_head);
     }
 }
 
@@ -88,6 +91,17 @@ fn local_user_exits(
         cmd.entity(res.3.entity_id).remove::<LocalUser>();
         cmd.entity(res.4.entity_id).remove::<LocalUser>();
         cmd.entity(res.5.entity_id).remove::<LocalUser>();
+    }
+}
+
+fn copy_roation_target_head(
+    mut q: Query<(&mut Transform, &IkConstraint), With<Bone<Head>>>,
+    src: Query<&Transform, (Without<Bone<Head>>, With<Target<Head>>)>,
+) {
+    for (mut tf, ik) in q.iter_mut() {
+        if let Ok(s) = src.get(ik.target) {
+            tf.rotation = s.rotation;
+        }
     }
 }
 
