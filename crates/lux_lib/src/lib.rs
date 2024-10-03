@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    log::{self, LogPlugin},
+    prelude::*,
+};
 use clap::Parser;
 use lux_cli::{Args, Command};
 
@@ -24,12 +27,17 @@ fn base_init(args: &Args, app: &mut App) {
         }) => headless,
         _ => false,
     };
+    let log_plugin = LogPlugin {
+        level: log::Level::INFO,
+        filter: "info,capture_bevy_logs=info".into(),
+        custom_layer: bevy_console::make_layer,
+    };
     if headless {
         lux_headless::init(app);
     } else if args.xr_enabled {
         cfg_if::cfg_if! {
             if #[cfg(feature="xr")] {
-                lux_xr::init(app);
+                lux_xr::init(app, DefaultPlugins.set(log_plugin));
                 lux_desktop::init(app);
             } else {
                 eprintln!("XR feature is not compiled in.");
@@ -37,7 +45,7 @@ fn base_init(args: &Args, app: &mut App) {
             }
         }
     } else {
-        app.add_plugins(DefaultPlugins);
+        app.add_plugins(DefaultPlugins.set(log_plugin));
         lux_desktop::init(app);
     }
 }
