@@ -1,12 +1,13 @@
 #![allow(clippy::type_complexity)]
 
-use bevy::prelude::*;
+use bevy::{math::vec3, prelude::*};
 use bevy_mod_xr::{
+    camera::XrCamera,
     hands::{HandBone, LeftHand, RightHand},
     session::XrTrackingRoot,
 };
 use lux_components::{
-    avatar_bones::{HandL, HandR, Target},
+    avatar_bones::{HandL, HandR, Head, Target},
     Avatar, LocalUser,
 };
 
@@ -17,7 +18,7 @@ pub fn init(app: &mut App) {
     );
     app.add_systems(
         Update,
-        (copy_transform_hand_l, copy_transform_hand_r).chain(),
+        (copy_head, copy_transform_hand_l, copy_transform_hand_r).chain(),
     );
 }
 
@@ -71,5 +72,21 @@ fn copy_transform_hand_r(
                 tfd.rotation = tfs.rotation;
             }
         }
+    }
+}
+
+fn copy_head(
+    src: Query<&Transform, With<XrCamera>>,
+    mut dst: Query<&mut Transform, (Without<XrCamera>, With<Target<Head>>, With<LocalUser>)>,
+) {
+    for mut tfd in dst.iter_mut() {
+        let mut pos = vec3(0.0, 0.0, 0.0);
+        let mut ct = vec3(0.0, 0.0, 0.0);
+        for tfs in src.iter() {
+            tfd.rotation = tfs.rotation;
+            pos += tfs.translation;
+            ct += vec3(1.0, 1.0, 1.0);
+        }
+        tfd.translation = pos / ct;
     }
 }
