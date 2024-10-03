@@ -11,7 +11,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_sync::SyncComponent;
-use bones::{Bone, FootL, FootR, HandL, HandR, Head, Root, Target};
+use bones::{Bone, FootL, FootR, HandL, HandR, Head, Hips, Root, Target};
 
 use crate::{ComponentEntityRef, LocalUser};
 
@@ -48,6 +48,7 @@ fn local_user_enters(
     q: Query<
         (
             &ComponentEntityRef<Bone<Root>>,
+            &ComponentEntityRef<Target<Hips>>,
             &ComponentEntityRef<Target<Head>>,
             &ComponentEntityRef<Target<HandL>>,
             &ComponentEntityRef<Target<HandR>>,
@@ -64,6 +65,7 @@ fn local_user_enters(
         cmd.entity(cer.3.entity_id).try_insert(LocalUser);
         cmd.entity(cer.4.entity_id).try_insert(LocalUser);
         cmd.entity(cer.5.entity_id).try_insert(LocalUser);
+        cmd.entity(cer.6.entity_id).try_insert(LocalUser);
     }
 }
 
@@ -74,6 +76,7 @@ fn local_user_exits(
     q: Query<
         (
             &ComponentEntityRef<Bone<Root>>,
+            &ComponentEntityRef<Target<Hips>>,
             &ComponentEntityRef<Target<Head>>,
             &ComponentEntityRef<Target<HandL>>,
             &ComponentEntityRef<Target<HandR>>,
@@ -91,6 +94,7 @@ fn local_user_exits(
         cmd.entity(res.3.entity_id).remove::<LocalUser>();
         cmd.entity(res.4.entity_id).remove::<LocalUser>();
         cmd.entity(res.5.entity_id).remove::<LocalUser>();
+        cmd.entity(res.6.entity_id).remove::<LocalUser>();
     }
 }
 

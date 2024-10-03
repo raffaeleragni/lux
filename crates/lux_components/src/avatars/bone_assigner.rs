@@ -1,4 +1,4 @@
-use std::sync::LazyLock;
+use std::{any::TypeId, sync::LazyLock};
 
 use crate::{avatars::bones::*, ComponentEntityRef};
 use bevy::{ecs::world::DeferredWorld, prelude::*};
@@ -37,7 +37,7 @@ static BONE_TREE: LazyLock<BoneTree> = LazyLock::new(|| {
     let hips = BonePair {
         name: "Hips",
         compo: Bone::<Hips>::default(),
-        target: None,
+        target: Some(Target::<Hips>::default()),
     };
     let spine = BonePair {
         name: "Spine",
@@ -230,14 +230,25 @@ impl<T: Bones> BoneApplier for BonePair<T> {
                 cmds.entity(avatar_id)
                     .insert(ComponentEntityRef::<Target<T>>::new(etid));
 
-                cmds.entity(found_id).insert(IkConstraint {
-                    chain_length: 2,
-                    iterations: 20,
-                    target: etid,
-                    pole_target: None,
-                    pole_angle: 0.0,
-                    enabled: true,
-                });
+                if TypeId::of::<T>() == TypeId::of::<Hips>() {
+                    cmds.entity(found_id).insert(IkConstraint {
+                        chain_length: 0,
+                        iterations: 20,
+                        target: etid,
+                        pole_target: None,
+                        pole_angle: 0.0,
+                        enabled: true,
+                    });
+                } else {
+                    cmds.entity(found_id).insert(IkConstraint {
+                        chain_length: 2,
+                        iterations: 20,
+                        target: etid,
+                        pole_target: None,
+                        pole_angle: 0.0,
+                        enabled: true,
+                    });
+                }
             }
             return Some(found_id);
         }
