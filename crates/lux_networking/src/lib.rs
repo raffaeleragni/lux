@@ -45,7 +45,7 @@ fn setup_sync(args: &Args, app: &mut App) {
             headless: _,
             ip,
         }) => app.add_plugins(ServerPlugin {
-            parameters: SyncConnectionParameters {
+            parameters: SyncConnectionParameters::Socket {
                 ip: ip.unwrap_or(localhost),
                 port: SYNC_PORT,
                 web_port: WEB_PORT,
@@ -53,7 +53,7 @@ fn setup_sync(args: &Args, app: &mut App) {
             },
         }),
         Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
-            parameters: SyncConnectionParameters {
+            parameters: SyncConnectionParameters::Socket {
                 ip: ip.clone().to_owned(),
                 port: SYNC_PORT,
                 web_port: WEB_PORT + 1,
