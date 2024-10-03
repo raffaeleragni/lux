@@ -231,8 +231,9 @@ impl<T: Bones> BoneApplier for BonePair<T> {
                     .insert(ComponentEntityRef::<Target<T>>::new(etid));
 
                 if TypeId::of::<T>() == TypeId::of::<Hips>() {
+                } else if TypeId::of::<T>() == TypeId::of::<Head>() {
                     cmds.entity(found_id).insert(IkConstraint {
-                        chain_length: 0,
+                        chain_length: 1,
                         iterations: 20,
                         target: etid,
                         pole_target: None,

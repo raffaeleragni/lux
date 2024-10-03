@@ -24,7 +24,10 @@ impl Plugin for AvatarPlugin {
         app.add_plugins(InverseKinematicsPlugin);
         app.add_systems(Update, local_user_enters);
         app.add_systems(Update, local_user_exits);
-        app.add_systems(Update, copy_roation_target_head);
+        app.add_systems(
+            Update,
+            (copy_roation_target_head, orient_hips_to_head).chain(),
+        );
     }
 }
 
@@ -95,6 +98,34 @@ fn local_user_exits(
         cmd.entity(res.4.entity_id).remove::<LocalUser>();
         cmd.entity(res.5.entity_id).remove::<LocalUser>();
         cmd.entity(res.6.entity_id).remove::<LocalUser>();
+    }
+}
+
+fn orient_hips_to_head(
+    av: Query<
+        (
+            &ComponentEntityRef<Bone<Hips>>,
+            &ComponentEntityRef<Target<Head>>,
+        ),
+        With<Avatar>,
+    >,
+    mut hips_tf: Query<&mut Transform, With<Bone<Hips>>>,
+    head_tf: Query<&Transform, (Without<Bone<Hips>>, With<Target<Head>>)>,
+) {
+    for (hips_id, head_id) in av.iter() {
+        if let Ok(head) = head_tf.get(head_id.entity_id) {
+            if let Ok(mut hips) = hips_tf.get_mut(hips_id.entity_id) {
+                let yonly = Quat::from_euler(
+                    EulerRot::YXZ,
+                    head.rotation.to_euler(EulerRot::YXZ).0,
+                    0.0,
+                    0.0,
+                );
+                hips.rotation = yonly;
+                hips.translation = head.translation;
+                hips.translation.y -= 0.8;
+            }
+        }
     }
 }
 
