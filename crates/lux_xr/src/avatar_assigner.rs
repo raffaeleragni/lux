@@ -83,7 +83,10 @@ fn copy_head(
         let mut pos = vec3(0.0, 0.0, 0.0);
         let mut ct = vec3(0.0, 0.0, 0.0);
         for tfs in src.iter() {
-            tfd.rotation = tfs.rotation;
+            let rot = tfs.rotation.to_euler(EulerRot::XYZ);
+            let rot =
+                Quat::from_euler(EulerRot::XYZ, -rot.0, rot.1 - f32::to_radians(180.0), rot.2);
+            tfd.rotation = rot;
             pos += tfs.translation;
             ct += vec3(1.0, 1.0, 1.0);
         }
