@@ -1,6 +1,6 @@
 use std::{any::TypeId, sync::LazyLock};
 
-use crate::avatars::bones::*;
+use crate::{avatars::bones::*, AvatarGeneric};
 use bevy::{ecs::world::DeferredWorld, prelude::*};
 use bevy_mod_inverse_kinematics::IkConstraint;
 use lux_components::ComponentEntityRef;
@@ -16,7 +16,31 @@ pub fn apply(id: Entity, world: &mut DeferredWorld) {
             .entity(id)
             .insert(ComponentEntityRef::<Bone<Root>>::new(armature_id));
         BONE_TREE.apply(id, armature_id, armature_id, world);
+        set_avatar_attributes(id, world);
     }
+}
+
+fn set_avatar_attributes(id: Entity, world: &mut DeferredWorld) {
+    let opt_hips_id = find_by_name_in_childs(&Name::new("Hips"), id, world);
+    let opt_head_id = find_by_name_in_childs(&Name::new("Head"), id, world);
+    let Some(hips_id) = opt_hips_id else {
+        return;
+    };
+    let Some(head_id) = opt_head_id else {
+        return;
+    };
+    let Some(hips_gt) = world.get::<GlobalTransform>(hips_id) else {
+        return;
+    };
+    let Some(head_gt) = world.get::<GlobalTransform>(head_id) else {
+        return;
+    };
+    let hips_gt = *hips_gt;
+    let head_gt = *head_gt;
+    let Some(mut av) = world.get_mut::<AvatarGeneric>(id) else {
+        return;
+    };
+    av.distance_hips_to_head = Vec3::distance(hips_gt.translation(), head_gt.translation());
 }
 
 struct BoneTree {

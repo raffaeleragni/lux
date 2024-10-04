@@ -108,7 +108,7 @@ fn after_spawn_load_avatar(
             .get_entity(e)
             .unwrap()
             .remove::<LoadAvatar>()
-            .insert(AvatarGeneric)
+            .insert(AvatarGeneric::default())
             .insert(LocalUser);
     }
 }

@@ -20,7 +20,7 @@ pub(crate) struct AvatarPlugin;
 
 impl Plugin for AvatarPlugin {
     fn build(&self, app: &mut App) {
-        app.sync_component::<Avatar>();
+        app.sync_component::<AvatarGeneric>();
         app.add_plugins(InverseKinematicsPlugin);
         app.add_systems(Update, local_user_enters);
         app.add_systems(Update, local_user_exits);
@@ -31,11 +31,13 @@ impl Plugin for AvatarPlugin {
     }
 }
 
-#[derive(Reflect)]
+#[derive(Reflect, Default)]
 #[reflect(Component)]
-pub struct Avatar;
+pub struct AvatarGeneric {
+    distance_hips_to_head: f32,
+}
 
-impl Component for Avatar {
+impl Component for AvatarGeneric {
     const STORAGE_TYPE: StorageType = StorageType::Table;
 
     fn register_component_hooks(hooks: &mut ComponentHooks) {
@@ -58,7 +60,7 @@ fn local_user_enters(
             &ComponentEntityRef<Target<FootL>>,
             &ComponentEntityRef<Target<FootR>>,
         ),
-        (With<Avatar>, Added<LocalUser>),
+        (With<AvatarGeneric>, Added<LocalUser>),
     >,
 ) {
     for cer in q.iter() {
@@ -86,7 +88,7 @@ fn local_user_exits(
             &ComponentEntityRef<Target<FootL>>,
             &ComponentEntityRef<Target<FootR>>,
         ),
-        With<Avatar>,
+        With<AvatarGeneric>,
     >,
 ) {
     for entity in removed.read() {
@@ -102,17 +104,15 @@ fn local_user_exits(
 }
 
 fn orient_hips_to_head(
-    av: Query<
-        (
-            &ComponentEntityRef<Bone<Hips>>,
-            &ComponentEntityRef<Target<Head>>,
-        ),
-        With<Avatar>,
-    >,
+    av: Query<(
+        &AvatarGeneric,
+        &ComponentEntityRef<Bone<Hips>>,
+        &ComponentEntityRef<Target<Head>>,
+    )>,
     mut hips_tf: Query<&mut Transform, With<Bone<Hips>>>,
     head_tf: Query<&Transform, (Without<Bone<Hips>>, With<Target<Head>>)>,
 ) {
-    for (hips_id, head_id) in av.iter() {
+    for (av, hips_id, head_id) in av.iter() {
         if let Ok(head) = head_tf.get(head_id.entity_id) {
             if let Ok(mut hips) = hips_tf.get_mut(hips_id.entity_id) {
                 let yonly = Quat::from_euler(
@@ -123,7 +123,7 @@ fn orient_hips_to_head(
                 );
                 hips.rotation = yonly;
                 hips.translation = head.translation;
-                hips.translation.y -= 0.8;
+                hips.translation.y -= av.distance_hips_to_head;
             }
         }
     }
@@ -150,7 +150,10 @@ mod test {
         let mut app = app();
         let root = add_armature(&mut app);
         app.update();
-        app.world_mut().commands().entity(root).try_insert(Avatar);
+        app.world_mut()
+            .commands()
+            .entity(root)
+            .try_insert(AvatarGeneric::default());
         app.update();
 
         check_bone_name::<Root>(&mut app, "Armature");
@@ -274,7 +277,7 @@ mod test {
         // Every Avatar entity has references to the targets
         let mut q = app
             .world_mut()
-            .query_filtered::<&ComponentEntityRef<Target<T>>, With<Avatar>>();
+            .query_filtered::<&ComponentEntityRef<Target<T>>, With<AvatarGeneric>>();
         let found_eid = q
             .iter(app.world())
             .next()
