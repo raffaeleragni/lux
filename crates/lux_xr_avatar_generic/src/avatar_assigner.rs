@@ -74,17 +74,17 @@ fn copy_transform_hand_r(
 }
 
 fn copy_head(
-    src: Query<&Transform, With<XrCamera>>,
+    src: Query<(&Transform, &XrCamera)>,
     mut dst: Query<&mut Transform, (Without<XrCamera>, With<Target<Head>>, With<LocalUser>)>,
 ) {
+    let roty = Quat::from_euler(EulerRot::XYZ, 0.0, f32::to_radians(180.0), 0.0);
     for mut tfd in dst.iter_mut() {
         let mut pos = vec3(0.0, 0.0, 0.0);
         let mut ct = vec3(0.0, 0.0, 0.0);
-        for tfs in src.iter() {
-            let rot = tfs.rotation.to_euler(EulerRot::XYZ);
-            let rot =
-                Quat::from_euler(EulerRot::XYZ, -rot.0, rot.1 - f32::to_radians(180.0), rot.2);
-            tfd.rotation = rot;
+        for (tfs, c) in src.iter() {
+            if c.0 == 0 {
+                tfd.rotation = tfs.rotation * roty;
+            }
             pos += tfs.translation;
             ct += vec3(1.0, 1.0, 1.0);
         }
