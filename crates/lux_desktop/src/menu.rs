@@ -17,6 +17,7 @@ impl Plugin for MenuPlugin {
             (
                 esc_to_enter_menu.run_if(in_state(MenuState::Off)),
                 esc_to_exit_menu.run_if(not(in_state(MenuState::Off))),
+                ctrl_q,
             ),
         );
     }
@@ -31,6 +32,14 @@ fn esc_to_enter_menu(input: Res<ButtonInput<KeyCode>>, mut state: ResMut<NextSta
 fn esc_to_exit_menu(input: Res<ButtonInput<KeyCode>>, mut state: ResMut<NextState<MenuState>>) {
     if input.just_pressed(KeyCode::Escape) {
         state.set(MenuState::Off);
+    }
+}
+
+fn ctrl_q(input: Res<ButtonInput<KeyCode>>, mut event: EventWriter<AppExit>) {
+    if input.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight])
+        && input.just_pressed(KeyCode::KeyQ)
+    {
+        event.send(AppExit::Success);
     }
 }
 
