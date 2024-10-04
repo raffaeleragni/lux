@@ -13,7 +13,7 @@ use bevy::{
 use bevy_sync::SyncComponent;
 use bones::{Bone, FootL, FootR, HandL, HandR, Head, Hips, Root, Target};
 
-use crate::{ComponentEntityRef, LocalUser};
+use lux_components::{ComponentEntityRef, LocalUser};
 
 #[derive(Default)]
 pub(crate) struct AvatarPlugin;
@@ -142,8 +142,6 @@ fn copy_roation_target_head(
 
 #[cfg(test)]
 mod test {
-    use crate::ComponentEntityRef;
-
     use super::*;
     use bones::*;
 

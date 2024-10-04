@@ -1,4 +1,3 @@
-mod avatar_assigner;
 mod flightcam;
 mod naming;
 
@@ -15,7 +14,7 @@ pub fn init<G: PluginGroup>(app: &mut App, g: G) {
         .add_systems(PostUpdate, quit_xr_on_app_exit);
     naming::init(app);
     flightcam::init(app);
-    avatar_assigner::init(app);
+    lux_xr_avatar_generic::init(app);
 }
 
 fn quit_xr_on_app_exit(

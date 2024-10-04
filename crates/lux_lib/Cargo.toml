@@ -15,11 +15,13 @@ lux_cli = { path = "../lux_cli" }
 lux_world = { path = "../lux_world" }
 lux_networking = { path = "../lux_networking" }
 lux_components = { path = "../lux_components" }
+lux_avatar_generic = { path = "../lux_avatar_generic" }
 lux_headless = { path = "../lux_headless" }
 lux_desktop = { path = "../lux_desktop" }
 lux_desktop_camera = { path = "../lux_desktop_camera" }
 lux_xr = { path = "../lux_xr", optional = true }
+lux_xr_avatar_generic = { path = "../lux_xr_avatar_generic", optional = true }
 
 [features]
 default = []
-xr = ["dep:lux_xr", "lux_cli/xr"]
+xr = ["dep:lux_xr", "lux_cli/xr", "dep:lux_xr_avatar_generic"]

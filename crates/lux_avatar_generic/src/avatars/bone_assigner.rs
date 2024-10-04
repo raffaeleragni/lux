@@ -1,8 +1,9 @@
 use std::{any::TypeId, sync::LazyLock};
 
-use crate::{avatars::bones::*, ComponentEntityRef};
+use crate::avatars::bones::*;
 use bevy::{ecs::world::DeferredWorld, prelude::*};
 use bevy_mod_inverse_kinematics::IkConstraint;
+use lux_components::ComponentEntityRef;
 
 pub fn apply(id: Entity, world: &mut DeferredWorld) {
     if let Some(armature_id) = find_armature_entity_id(id, world) {

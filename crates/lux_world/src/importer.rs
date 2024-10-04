@@ -1,6 +1,7 @@
 use bevy::{prelude::*, scene::SceneInstance};
 use bevy_sync::{SyncEntity, SyncMark, Uuid};
-use lux_components::{Avatar, LocalUser};
+use lux_avatar_generic::AvatarGeneric;
+use lux_components::LocalUser;
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
@@ -61,7 +62,7 @@ fn after_spawn_load_avatar(
             .get_entity(e)
             .unwrap()
             .remove::<LoadAvatar>()
-            .insert(Avatar)
+            .insert(AvatarGeneric)
             .insert(LocalUser);
     }
 }

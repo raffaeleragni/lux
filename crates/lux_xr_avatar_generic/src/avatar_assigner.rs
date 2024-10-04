@@ -1,15 +1,13 @@
 #![allow(clippy::type_complexity)]
 
+use lux_avatar_generic::{bones::*, AvatarGeneric};
 use bevy::{math::vec3, prelude::*};
 use bevy_mod_xr::{
     camera::XrCamera,
     hands::{HandBone, LeftHand, RightHand},
     session::XrTrackingRoot,
 };
-use lux_components::{
-    avatar_bones::{HandL, HandR, Head, Target},
-    Avatar, LocalUser,
-};
+use lux_components::LocalUser;
 
 pub fn init(app: &mut App) {
     app.add_systems(
@@ -25,7 +23,7 @@ pub fn init(app: &mut App) {
 fn local_user_enters_root(
     mut cmd: Commands,
     xr_root: Query<Entity, With<XrTrackingRoot>>,
-    q: Query<Entity, (With<Avatar>, Added<LocalUser>)>,
+    q: Query<Entity, (With<AvatarGeneric>, Added<LocalUser>)>,
 ) {
     for avatar_root_id in q.iter() {
         let avatar_root = cmd.entity(avatar_root_id).id();
@@ -38,7 +36,7 @@ fn local_user_enters_root(
 fn local_user_exits_root(
     mut cmd: Commands,
     mut removed: RemovedComponents<LocalUser>,
-    q: Query<Entity, With<Avatar>>,
+    q: Query<Entity, With<AvatarGeneric>>,
 ) {
     for entity in removed.read() {
         if let Ok(e) = q.get(entity) {
