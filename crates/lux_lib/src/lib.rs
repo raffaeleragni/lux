@@ -13,6 +13,8 @@ pub fn app() -> App {
     base_init(&args, &mut app);
     lux_networking::init(&args, &mut app);
     lux_components::init(&mut app);
+    lux_avatar_generic::init(&mut app);
+    lux_avatar_vrm::init(&mut app);
     lux_world::init(&mut app);
 
     app
@@ -24,6 +26,7 @@ fn base_init(args: &Args, app: &mut App) {
             world_file: _,
             headless,
             ip: _,
+            avatar_file: _,
         }) => headless,
         _ => false,
     };

@@ -8,9 +8,11 @@ edition = "2021"
 [dependencies]
 bevy.workspace = true
 bevy_sync.workspace = true
+bevy_vr_controller.workspace = true
 lux_cli = { path = "../lux_cli" }
 lux_components = { path = "../lux_components" }
 lux_avatar_generic = { path = "../lux_avatar_generic" }
+lux_avatar_vrm = { path = "../lux_avatar_vrm" }
 
 [dev-dependencies]
 bevy_editor_pls.workspace = true

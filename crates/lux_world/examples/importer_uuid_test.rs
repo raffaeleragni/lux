@@ -15,6 +15,7 @@ fn main() {
             world_file: "cube.glb".to_string(),
             headless: false,
             ip: None,
+            avatar_file: None,
         }),
     });
     init(&mut app);

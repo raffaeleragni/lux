@@ -44,6 +44,7 @@ fn setup_sync(args: &Args, app: &mut App) {
             world_file: _,
             headless: _,
             ip,
+            avatar_file: _,
         }) => app.add_plugins(ServerPlugin {
             parameters: SyncConnectionParameters::Socket {
                 ip: ip.unwrap_or(localhost),
@@ -52,7 +53,7 @@ fn setup_sync(args: &Args, app: &mut App) {
                 max_transfer: 1_000_000_000,
             },
         }),
-        Some(Command::Join { ip }) => app.add_plugins(ClientPlugin {
+        Some(Command::Join { ip, avatar_file: _ }) => app.add_plugins(ClientPlugin {
             parameters: SyncConnectionParameters::Socket {
                 ip: ip.clone().to_owned(),
                 port: SYNC_PORT,

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy.workspace = true
+avian3d.workspace = true
 bevy_vr_controller.workspace = true
 
 [features]

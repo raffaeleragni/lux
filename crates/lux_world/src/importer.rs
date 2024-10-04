@@ -1,5 +1,6 @@
 use bevy::{prelude::*, scene::SceneInstance};
 use bevy_sync::{SyncEntity, SyncMark, Uuid};
+use bevy_vr_controller::player::PlayerSettings;
 use lux_avatar_generic::AvatarGeneric;
 use lux_components::LocalUser;
 
@@ -14,18 +15,63 @@ pub(crate) fn init(app: &mut App) {
 pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let scene = assets.load(file_name.to_owned() + "#Scene0");
     debug!("Loading SceneBundle: {:?}", scene);
-    let name = file_name.to_string();
+    let name = strip_file_name(file_name);
     commands.spawn((
         Name::new(name),
         SceneBundle {
             scene,
             ..Default::default()
         },
-        LoadAvatar,
         LoadedSceneItem,
         LoadedSceneItemHandleMesh,
         LoadedSceneItemHandleMaterial,
     ));
+}
+
+pub fn import_avatar(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
+    let is_vrm = file_name.ends_with(".vrm");
+    let name = strip_file_name(file_name);
+    if is_vrm {
+        let avatar_id = PlayerSettings {
+            animations: None,
+            spawn: Vec3::new(0.0, 3.0, 0.0),
+            void_level: Some(-20.0),
+            vrm: Some(assets.load(file_name.to_owned())),
+            ..default()
+        }
+        .spawn(commands)
+        .avatar;
+        commands.entity(avatar_id).insert((
+            Name::new(name),
+            LoadedSceneItem,
+            LoadedSceneItemHandleMesh,
+            LoadedSceneItemHandleMaterial,
+        ));
+    } else {
+        let scene = assets.load(file_name.to_owned() + "#Scene0");
+        debug!("Loading SceneBundle: {:?}", scene);
+        commands.spawn((
+            Name::new(name),
+            SceneBundle {
+                scene,
+                ..Default::default()
+            },
+            LoadAvatar,
+            LoadedSceneItem,
+            LoadedSceneItemHandleMesh,
+            LoadedSceneItemHandleMaterial,
+        ));
+    }
+}
+
+fn strip_file_name(file_name: &str) -> String {
+    let name = file_name
+        .split("/")
+        .last()
+        .and_then(|s| s.split("\\").last())
+        .unwrap_or(file_name)
+        .to_string();
+    name
 }
 
 pub fn import_audio(file_name: &str, commands: &mut Commands, assets: &AssetServer) {

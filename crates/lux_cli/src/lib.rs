@@ -21,7 +21,17 @@ pub enum Command {
         #[clap(long, default_value_t = false)]
         headless: bool,
         ip: Option<IpAddr>,
+        /// Path to the avatar file.
+        /// Supports: .vrm or .glb/.gltf avatars.
+        #[clap(name = "avatar", long)]
+        avatar_file: Option<String>,
     },
     #[clap(name = "join")]
-    Join { ip: IpAddr },
+    Join {
+        ip: IpAddr,
+        /// Path to the avatar file.
+        /// Supports: .vrm or .glb/.gltf avatars.
+        #[clap(name = "avatar", long)]
+        avatar_file: Option<String>,
+    },
 }
