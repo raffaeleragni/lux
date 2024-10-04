@@ -16,7 +16,7 @@ lux_world = { path = "../lux_world" }
 lux_networking = { path = "../lux_networking" }
 lux_components = { path = "../lux_components" }
 lux_avatar_generic = { path = "../lux_avatar_generic" }
-lux_avatar_vrm = { path = "../lux_avatar_vrm" }
+lux_avatar_vrm = { path = "../lux_avatar_vrm", optional = true }
 lux_headless = { path = "../lux_headless" }
 lux_desktop = { path = "../lux_desktop" }
 lux_desktop_camera = { path = "../lux_desktop_camera" }
@@ -25,4 +25,5 @@ lux_xr_avatar_generic = { path = "../lux_xr_avatar_generic", optional = true }
 
 [features]
 default = []
+vrm = ["dep:lux_avatar_vrm", "lux_world/vrm"]
 xr = ["dep:lux_xr", "lux_cli/xr", "dep:lux_xr_avatar_generic", "lux_world/xr", "lux_avatar_vrm/xr"]

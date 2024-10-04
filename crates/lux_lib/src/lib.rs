@@ -14,6 +14,7 @@ pub fn app() -> App {
     lux_networking::init(&args, &mut app);
     lux_components::init(&mut app);
     lux_avatar_generic::init(&mut app);
+    #[cfg(feature = "vrm")]
     lux_avatar_vrm::init(&mut app);
     lux_world::init(&mut app);
 

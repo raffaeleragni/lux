@@ -34,4 +34,5 @@ bevy_xr_utils = { git = "https://github.com/raffaeleragni/bevy_oxr" }
 
 [features]
 default = []
+vrm = ["lux_lib/vrm"]
 xr = ["lux_lib/xr"]
