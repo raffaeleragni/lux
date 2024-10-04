@@ -16,3 +16,7 @@ lux_avatar_vrm = { path = "../lux_avatar_vrm" }
 
 [dev-dependencies]
 bevy_editor_pls.workspace = true
+
+[features]
+default = []
+xr = ["bevy_vr_controller/xr", "lux_avatar_vrm/xr"]

@@ -25,7 +25,8 @@ bevy_editor_pls = { git = "https://github.com/raffaeleragni/bevy_editor_pls" }
 # IK -----
 bevy_mod_inverse_kinematics = { git = "https://github.com/raffaeleragni/bevy_mod_inverse_kinematics" }
 # VR -----
-bevy_vr_controller = { git = "https://github.com/raffaeleragni/bevy_vr_controller" }
+#bevy_vr_controller = { path = "../bevy_vr_controller", default-features = false }
+bevy_vr_controller = { git = "https://github.com/raffaeleragni/bevy_vr_controller", default-features = false }
 # XR -----
 bevy_mod_openxr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
 bevy_mod_xr = { git = "https://github.com/raffaeleragni/bevy_oxr" }

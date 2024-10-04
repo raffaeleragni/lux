@@ -10,4 +10,4 @@ bevy_vr_controller.workspace = true
 
 [features]
 default = []
-xr = []
+xr = ["bevy_vr_controller/xr"]

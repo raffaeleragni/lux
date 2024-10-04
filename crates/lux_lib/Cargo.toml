@@ -25,4 +25,4 @@ lux_xr_avatar_generic = { path = "../lux_xr_avatar_generic", optional = true }
 
 [features]
 default = []
-xr = ["dep:lux_xr", "lux_cli/xr", "dep:lux_xr_avatar_generic", "lux_avatar_vrm/xr"]
+xr = ["dep:lux_xr", "lux_cli/xr", "dep:lux_xr_avatar_generic", "lux_world/xr", "lux_avatar_vrm/xr"]
