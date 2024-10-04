@@ -21,9 +21,10 @@ bevy_egui = "0.29"
 bevy_console = { git = "https://github.com/raffaeleragni/bevy-console" }
 # Editor -
 bevy_editor_pls = { git = "https://github.com/raffaeleragni/bevy_editor_pls" }
-
 # IK -----
 bevy_mod_inverse_kinematics = { git = "https://github.com/raffaeleragni/bevy_mod_inverse_kinematics" }
+# VR -----
+bevy_vr_controller = { git = "https://github.com/raffaeleragni/bevy_vr_controller" }
 # XR -----
 bevy_mod_openxr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
 bevy_mod_xr = { git = "https://github.com/raffaeleragni/bevy_oxr" }

@@ -1,12 +1,12 @@
 #![allow(clippy::type_complexity)]
 
-use lux_avatar_generic::{bones::*, AvatarGeneric};
 use bevy::{math::vec3, prelude::*};
 use bevy_mod_xr::{
     camera::XrCamera,
     hands::{HandBone, LeftHand, RightHand},
     session::XrTrackingRoot,
 };
+use lux_avatar_generic::{bones::*, AvatarGeneric};
 use lux_components::LocalUser;
 
 pub fn init(app: &mut App) {
