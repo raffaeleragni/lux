@@ -111,7 +111,7 @@ fn noclip_movement(
         if direction.is_nan() {
             continue;
         }
-        t.translation += direction * clip.speed * time.delta_seconds();
+        t.translation += direction * clip.speed * time.delta_secs();
     }
 }
 
@@ -131,8 +131,8 @@ fn noclip_look(
         return;
     }
     for (mut t, mut clip) in query.iter_mut() {
-        let y = clip.mouse_speed * time.delta_seconds() * total.y;
-        let x = clip.mouse_speed * time.delta_seconds() * total.x;
+        let y = clip.mouse_speed * time.delta_secs() * total.y;
+        let x = clip.mouse_speed * time.delta_secs() * total.x;
         clip.mouse_vertical += y;
         clip.mouse_horizontal -= x;
         clip.mouse_vertical = clip.mouse_vertical.clamp(-90.0, 90.0);
@@ -353,7 +353,7 @@ mod test {
         app.add_plugins(StatesPlugin);
         app.add_plugins(DesktopCameraPlugin);
         app.world_mut().spawn((
-            SpatialBundle::default(),
+            Transform::default(),
             NoClip {
                 speed,
                 mouse_speed,

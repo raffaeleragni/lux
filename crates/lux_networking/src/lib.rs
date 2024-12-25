@@ -32,9 +32,8 @@ fn setup_sync(args: &Args, app: &mut App) {
     app.sync_component::<DirectionalLight>();
     app.sync_component::<MeshMorphWeights>();
     app.sync_component::<SkinnedMesh>();
-    app.sync_component::<Handle<StandardMaterial>>();
-    app.sync_component::<Handle<Mesh>>();
-    app.sync_component::<Handle<Image>>();
+    app.sync_component::<MeshMaterial3d<StandardMaterial>>();
+    app.sync_component::<Mesh3d>();
     app.sync_materials(true);
     app.sync_meshes(true);
 

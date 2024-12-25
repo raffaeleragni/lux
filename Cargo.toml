@@ -12,10 +12,10 @@ members = ["crates/*"]
 [workspace.dependencies]
 cfg-if = "1.0.0"
 clap = { version = "4.5.19", features = ["derive"] }
-bevy = { version = "0.14" }
-bevy_sync = "0.14.3"
-bevy_egui = "0.29"
-avian3d = "0.1.2"
+bevy = { version = "0.15" }
+bevy_sync = "0.15.0"
+bevy_egui = "0.31.1"
+avian3d = "0.2.0"
 
 bevy_editor_pls = "0.10.0"
 

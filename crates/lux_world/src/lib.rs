@@ -3,6 +3,7 @@ mod importer;
 
 use bevy::prelude::*;
 use empty_world::spawn_empty_world;
+use importer::AvatarLaterImport;
 use lux_cli::{Args, Command};
 
 pub use importer::import_audio;
@@ -43,7 +44,7 @@ fn load_world_from_args(
     }
 }
 
-fn load_avatar_from_args(args: Res<Args>, assets: Res<AssetServer>, mut commands: Commands) {
+fn load_avatar_from_args(args: Res<Args>, mut commands: Commands) {
     let avatar_file = match &args.command {
         Some(Command::Host {
             world_file: _,
@@ -61,6 +62,8 @@ fn load_avatar_from_args(args: Res<Args>, assets: Res<AssetServer>, mut commands
     }
     .to_owned();
     if let Some(avatar_file) = avatar_file {
-        importer::import_avatar(avatar_file.as_str(), &mut commands, &assets);
+        commands.spawn(AvatarLaterImport {
+            file_name: avatar_file.to_string(),
+        });
     }
 }

@@ -1,8 +1,14 @@
 use bevy::{prelude::*, scene::SceneInstance};
-use bevy_sync::{SyncEntity, SyncMark, Uuid};
+use bevy_sync::{InitialSyncFinished, SyncEntity, SyncMark, Uuid};
 use bevy_vr_controller::player::PlayerSettings;
 use lux_avatar_generic::AvatarGeneric;
 use lux_components::LocalUser;
+
+#[derive(Debug, Component, Reflect)]
+#[reflect(Component, FromReflect)]
+pub struct AvatarLaterImport {
+    pub file_name: String,
+}
 
 pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (propagate, cleanup).chain());
@@ -10,6 +16,7 @@ pub(crate) fn init(app: &mut App) {
     app.add_systems(Update, (handle_material, cleanup_material).chain());
     app.add_systems(Update, (handle_audio, cleanup_audio).chain());
     app.add_systems(Update, after_spawn_load_avatar);
+    app.add_systems(Update, avatar_later_import);
 }
 
 pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
@@ -28,7 +35,21 @@ pub fn import_gltf(file_name: &str, commands: &mut Commands, assets: &AssetServe
     ));
 }
 
-pub fn import_avatar(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
+fn avatar_later_import(
+    mut event: EventReader<InitialSyncFinished>,
+    mut q: Query<(Entity, &AvatarLaterImport)>,
+    mut commands: Commands,
+    assets: ResMut<AssetServer>,
+) {
+    if event.read().next().is_some() {
+        for (id, av) in q.iter_mut() {
+            import_avatar(av.file_name.as_str(), &mut commands, &assets);
+            commands.entity(id).despawn_recursive();
+        }
+    }
+}
+
+fn import_avatar(file_name: &str, commands: &mut Commands, assets: &AssetServer) {
     let is_vrm = file_name.ends_with(".vrm");
     let name = strip_file_name(file_name);
     if is_vrm {
