@@ -10,7 +10,6 @@ cfg-if.workspace = true
 clap.workspace = true
 bevy.workspace = true
 bevy_sync.workspace = true
-bevy_console.workspace = true
 lux_cli = { path = "../lux_cli" }
 lux_world = { path = "../lux_world" }
 lux_networking = { path = "../lux_networking" }

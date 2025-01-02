@@ -17,22 +17,20 @@ bevy_sync = "0.14.3"
 bevy_egui = "0.29"
 avian3d = "0.1.2"
 
+bevy_editor_pls = "0.10.0"
+
+bevy_mod_openxr = "0.1.0"
+bevy_mod_xr = "0.1.0"
+bevy_xr_utils = "0.1.0"
+
 # Below are unstable crates that require patching or forking
 
-bevy_console = { git = "https://github.com/raffaeleragni/bevy-console" }
-# Editor -
-bevy_editor_pls = { git = "https://github.com/raffaeleragni/bevy_editor_pls" }
 # IK -----
 bevy_mod_inverse_kinematics = { git = "https://github.com/raffaeleragni/bevy_mod_inverse_kinematics" }
-# VR -----
 #bevy_vr_controller = { path = "../bevy_vr_controller", default-features = false }
 bevy_vr_controller = { git = "https://github.com/raffaeleragni/bevy_vr_controller", default-features = false }
-# XR -----
-bevy_mod_openxr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
-bevy_mod_xr = { git = "https://github.com/raffaeleragni/bevy_oxr" }
-bevy_xr_utils = { git = "https://github.com/raffaeleragni/bevy_oxr" }
 
 [features]
-default = []
+default = ["xr"]
 vrm = ["lux_lib/vrm"]
 xr = ["lux_lib/xr"]
